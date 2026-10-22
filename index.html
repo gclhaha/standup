@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+<title>不许坐着 · 关不掉的运动闹钟</title>
+<meta name="description" content="只有身体真的动起来，这个计时器才会走完。摄像头画面只在本机处理。" />
+<meta name="theme-color" content="#05070a" />
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%2305070a'/%3E%3Ccircle cx='16' cy='9' r='4' fill='none' stroke='%233bffc1' stroke-width='2'/%3E%3Cpath d='M16 14v9M9 19h14M16 23l-5 6M16 23l5 6' stroke='%233bffc1' stroke-width='2.2' stroke-linecap='round'/%3E%3C/svg%3E" />
+<link rel="stylesheet" href="./style.css" />
+<script src="./vendor/mediapipe/pose.js"></script>
+</head>
+<body>
+
+<div id="app">
+
+  <!-- ========== 介绍页 ========== -->
+  <section class="screen active" id="intro">
+    <div class="grain"></div>
+    <div class="intro-inner">
+      <p class="eyebrow">给每一个坐了太久的人</p>
+      <h1 class="title">不许坐着</h1>
+      <p class="lede">身体不动，闹钟不停。<br />坐满一整天之前，先站起来动 <span id="lede-sec">30</span> 秒。</p>
+
+      <div class="picker" role="group" aria-label="选择运动时长">
+        <button class="chip active" data-duration="30" type="button">30 秒</button>
+        <button class="chip" data-duration="60" type="button">60 秒</button>
+        <button class="chip" data-duration="90" type="button">90 秒</button>
+      </div>
+
+      <button class="primary" id="btn-start" type="button">
+        <span>打开摄像头 · 开始</span>
+      </button>
+
+      <p class="privacy">画面只在这台设备上处理，不会上传，不会保存。</p>
+
+      <div class="how">
+        <div class="how-item"><b>01</b><span>站到镜头前，让全身进入画面</span></div>
+        <div class="how-item"><b>02</b><span>跟着火柴人动，强度条亮起来才算数</span></div>
+        <div class="how-item"><b>03</b><span>停下超过 1 秒，计时就冻住</span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========== 挑战页 ========== -->
+  <section class="screen" id="stage">
+    <div class="viewport" id="viewport">
+      <video class="video-bg" id="video-bg" playsinline muted></video>
+      <video class="video-fg" id="video" playsinline muted></video>
+      <canvas id="overlay"></canvas>
+      <div class="vignette"></div>
+      <div class="scanline"></div>
+    </div>
+
+    <div class="hud hud-top">
+      <div class="timer-wrap">
+        <div class="timer" id="timer">30.0</div>
+        <div class="timer-label">剩余秒数</div>
+      </div>
+      <div class="meter">
+        <div class="meter-bar"><i id="meter-fill"></i></div>
+        <div class="meter-row">
+          <span id="meter-text">等待动作</span>
+          <span id="meter-pct">0%</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="hud hud-bottom">
+      <p class="coach" id="coach">站到镜头前，让全身进入画面</p>
+    </div>
+
+    <div class="edge-alarm" id="edge-alarm"></div>
+    <div class="alarm-word" id="alarm-word">动起来！</div>
+
+    <button class="quit" id="btn-quit" type="button"><i class="fill"></i><span>长按退出</span></button>
+
+    <div class="boot" id="boot">
+      <div class="boot-ring"></div>
+      <p id="boot-text">正在唤醒识别引擎…</p>
+    </div>
+  </section>
+
+  <!-- ========== 结果页 ========== -->
+  <section class="screen" id="result">
+    <div class="grain"></div>
+    <div class="result-inner">
+      <p class="eyebrow" id="result-eyebrow">挑战完成</p>
+      <h2 class="result-title" id="result-title">你动了。</h2>
+      <p class="result-sub" id="result-sub">这 30 秒，你的身体是真的动过了。</p>
+
+      <div class="stats">
+        <div class="stat">
+          <b id="stat-time">30.0</b>
+          <span>秒 · 有效运动</span>
+        </div>
+        <div class="stat">
+          <b id="stat-int">0</b>
+          <span>平均强度</span>
+        </div>
+        <div class="stat">
+          <b id="stat-jump">0</b>
+          <span>约等于开合跳</span>
+        </div>
+      </div>
+
+      <div class="result-actions">
+        <button class="primary" id="btn-again" type="button"><span>再来一组</span></button>
+        <button class="ghost" id="btn-share" type="button"><span>保存成绩卡片</span></button>
+        <button class="ghost" id="btn-home" type="button"><span>回到首页</span></button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========== 错误层 ========== -->
+  <div class="fatal" id="fatal">
+    <div class="fatal-box">
+      <h3 id="fatal-title">打不开摄像头</h3>
+      <p id="fatal-text">需要摄像头权限才能识别你的动作。</p>
+      <button class="primary" id="btn-retry" type="button"><span>再试一次</span></button>
+    </div>
+  </div>
+
+</div>
+
+<script type="module" src="./js/app.js"></script>
+</body>
+</html>

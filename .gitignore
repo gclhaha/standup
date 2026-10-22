@@ -1,0 +1,9 @@
+node_modules/
+.vercel/
+.DS_Store
+*.log
+
+# 运行时残留的临时文件
+2_dyngk4
+qv81iwvl
+v6zz821p
