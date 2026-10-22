@@ -16,6 +16,28 @@ const BODY = [
   { i: 27, w: 1.5 },  { i: 28, w: 1.5 }
 ];
 
+/**
+ * 灵敏度档位。三个数值都在控制"多难才算动起来"：
+ *   deadZone  死区，运动量要先穿过这段才产生强度，调大 = 更迟钝
+ *   scale     强度归一化除数，调大 = 同样的动作得到的强度更低
+ *   activeAt  判定为"运动中"的最低强度，调大 = 门槛更高
+ *
+ * 地址栏加 ?sens=low / ?sens=high 可以切换，默认 mid。
+ */
+const SENSITIVITY = {
+  high: { deadZone: 0.10, scale: 1.55, activeAt: 0.14 },
+  mid:  { deadZone: 0.24, scale: 2.30, activeAt: 0.28 },
+  low:  { deadZone: 0.42, scale: 3.40, activeAt: 0.38 }
+};
+
+function pickSensitivity() {
+  let level = 'mid';
+  try {
+    level = new URLSearchParams(location.search).get('sens') || 'mid';
+  } catch (_) {}
+  return SENSITIVITY[level] || SENSITIVITY.mid;
+}
+
 export class Tracker {
   constructor() {
     this.pose = null;
@@ -30,6 +52,7 @@ export class Tracker {
     this.frames = 0;
     this.fpsT = 0;
     this.fps = 0;
+    this.sens = pickSensitivity();
   }
 
   async init(onFrame) {
@@ -118,8 +141,11 @@ export class Tracker {
   }
 
   emit(dt) {
-    const excess = Math.max(0, this.motion - this.floor - 0.10);
-    const intensity = Math.min(1, excess / 1.55);
+    const { deadZone, scale, activeAt } = this.sens;
+    const excess = Math.max(0, this.motion - this.floor - deadZone);
+    const intensity = Math.min(1, excess / scale);
+    // 当前档位下，运动量需要达到多少才算"在动"
+    const trigger = this.floor + deadZone + activeAt * scale;
 
     if (this.onFrame) {
       this.onFrame({
@@ -128,6 +154,9 @@ export class Tracker {
         motion: this.motion,
         floor: this.floor,
         intensity,
+        active: this.detected && intensity >= activeAt,
+        threshold: activeAt,
+        trigger,
         dt
       });
     }

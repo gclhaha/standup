@@ -215,7 +215,7 @@ function onFrame(d) {
 
   if (d.detected) state.everDetected = true;
 
-  const active = d.detected && d.intensity > 0.14;
+  const active = d.active;
 
   if (active) {
     state.idle = 0;
@@ -260,10 +260,10 @@ function updateHud(d, active, dt) {
   } else if (state.idle > 1.2) {
     text = COACH.idle;
     cls = 'off';
-  } else if (d.intensity > 0.62) {
+  } else if (d.intensity > 0.55) {
     text = COACH.great;
     cls = 'hot';
-  } else if (d.intensity > 0.28) {
+  } else if (d.intensity > 0.20) {
     text = COACH.good;
     cls = 'hot';
   } else {
@@ -278,7 +278,7 @@ function updateHud(d, active, dt) {
   el.coach.classList.toggle('off', cls === 'off');
 
   el.meterText.textContent = DEBUG
-    ? `m ${d.motion.toFixed(2)} / f ${d.floor.toFixed(2)}`
+    ? `m ${d.motion.toFixed(2)} / 需 ${d.trigger.toFixed(2)}`
     : !d.detected
       ? '未检测到人体'
       : active
@@ -380,9 +380,9 @@ function finish() {
 
   const moved = state.moved;
   const avg = moved > 0 ? state.intensitySum / moved : 0;
-  const jumps = Math.round(moved * (0.35 + avg * 1.15));
+  const jumps = Math.round(moved * (0.45 + avg * 2.0));
 
-  const tier = avg > 0.55 ? 'high' : avg > 0.3 ? 'mid' : 'low';
+  const tier = avg > 0.40 ? 'high' : avg > 0.17 ? 'mid' : 'low';
   const [title, sub] = pick(RESULT_LINES[tier]);
 
   el.resultEyebrow.textContent = `${state.duration} 秒挑战完成`;
