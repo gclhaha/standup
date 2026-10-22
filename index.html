@@ -39,8 +39,45 @@
         <div class="how-item"><b>02</b><span>跟着火柴人动，强度条亮起来才算数</span></div>
         <div class="how-item"><b>03</b><span>停下超过 1 秒，计时就冻住</span></div>
       </div>
+
+      <div class="reminder-card" id="reminder-card">
+        <div class="reminder-top">
+          <div class="reminder-heading">
+            <p class="reminder-title">运动闹钟</p>
+            <p class="reminder-sub" id="reminder-sub">每隔一段时间提醒你起身，标签页开着就行</p>
+          </div>
+          <button class="switch" id="reminder-switch" type="button" role="switch" aria-checked="false" aria-label="开启定时提醒">
+            <i></i>
+          </button>
+        </div>
+
+        <div class="reminder-body" id="reminder-body">
+          <div class="picker picker-sm" id="reminder-intervals">
+            <button class="chip" data-min="30" type="button">30 分钟</button>
+            <button class="chip active" data-min="60" type="button">1 小时</button>
+            <button class="chip" data-min="90" type="button">90 分钟</button>
+          </div>
+          <p class="reminder-note">保持这个标签页打开，建议右键把它固定住。到点会弹系统通知，点通知直接开始挑战。</p>
+        </div>
+
+        <div class="reminder-live" id="reminder-live">
+          <span class="pulse"></span>
+          <span id="reminder-countdown">下次提醒</span>
+          <button class="linkish" id="reminder-off" type="button">关闭</button>
+        </div>
+      </div>
     </div>
   </section>
+
+  <!-- 到点浮层 -->
+  <div class="reminder-toast" id="reminder-toast">
+    <p class="reminder-toast-title">该起身了</p>
+    <p class="reminder-toast-sub">坐着的时间够了，动 30 秒就回来。</p>
+    <div class="reminder-toast-actions">
+      <button class="primary sm" id="reminder-go" type="button"><span>现在开始</span></button>
+      <button class="ghost sm" id="reminder-snooze" type="button"><span>缓 5 分钟</span></button>
+    </div>
+  </div>
 
   <!-- ========== 挑战页 ========== -->
   <section class="screen" id="stage">

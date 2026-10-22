@@ -2,6 +2,7 @@ import { Skeleton } from './skeleton.js';
 import { Tracker } from './tracker.js';
 import { Sfx } from './audio.js';
 import { makeShareCard, downloadOrShare } from './share.js';
+import { Reminder } from './reminder.js';
 
 const $ = (id) => document.getElementById(id);
 const DEBUG = new URLSearchParams(location.search).has('debug');
@@ -48,7 +49,18 @@ const el = {
   fatal: $('fatal'),
   fatalTitle: $('fatal-title'),
   fatalText: $('fatal-text'),
-  btnRetry: $('btn-retry')
+  btnRetry: $('btn-retry'),
+  toast: $('toast'),
+
+  reminderCard: $('reminder-card'),
+  reminderSwitch: $('reminder-switch'),
+  reminderIntervals: $('reminder-intervals'),
+  reminderCountdown: $('reminder-countdown'),
+  reminderSub: $('reminder-sub'),
+  reminderOff: $('reminder-off'),
+  reminderToast: $('reminder-toast'),
+  reminderGo: $('reminder-go'),
+  reminderSnooze: $('reminder-snooze')
 };
 
 const skeleton = new Skeleton(el.overlay);
@@ -75,8 +87,62 @@ const state = {
   frames: 0,
   fpsTime: 0,
   fps: 0,
-  lastCoach: ''
+  lastCoach: '',
+  reminderInterval: 60
 };
+
+/* ---------------- 运动闹钟 ---------------- */
+
+const reminder = new Reminder({
+  onFire: () => {
+    if (state.running) return; // 正在挑战就别打扰
+    sfx.warn();
+    showReminderToast();
+  },
+  onActivate: () => {
+    hideReminderToast();
+    if (state.screen !== 'stage') {
+      goFullscreen();
+      startChallenge();
+    }
+  },
+  onTick: () => {
+    if (reminder.state.on) {
+      el.reminderCountdown.textContent = reminder.remainText();
+    }
+  }
+});
+
+/* ---------------- 轻提示 ---------------- */
+
+let toastTimer = null;
+
+function toast(msg) {
+  if (!el.toast) return;
+  el.toast.textContent = msg;
+  el.toast.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => el.toast.classList.remove('show'), 2200);
+}
+
+function showReminderToast() {
+  if (!el.reminderToast) return;
+  el.reminderToast.classList.add('show');
+}
+
+function hideReminderToast() {
+  if (!el.reminderToast) return;
+  el.reminderToast.classList.remove('show');
+}
+
+function renderReminder() {
+  const on = reminder.state.on;
+  el.reminderCard.classList.toggle('on', on);
+  el.reminderSwitch.setAttribute('aria-checked', on ? 'true' : 'false');
+  el.reminderSub.textContent = on
+    ? `每 ${reminder.state.interval} 分钟提醒一次`
+    : '每隔一段时间提醒你起身，标签页开着就行';
+}
 
 const COACH = {
   noPerson: '站到镜头前',
@@ -599,6 +665,66 @@ window.addEventListener('beforeunload', (e) => {
     e.returnValue = '';
   }
 });
+
+/* ---------------- 运动闹钟交互 ---------------- */
+
+el.reminderIntervals.addEventListener('click', (e) => {
+  const btn = e.target.closest('.chip');
+  if (!btn) return;
+  el.reminderIntervals.querySelectorAll('.chip').forEach((c) => c.classList.remove('active'));
+  btn.classList.add('active');
+  state.reminderInterval = Number(btn.dataset.min) || 60;
+});
+
+el.reminderSwitch.addEventListener('click', async () => {
+  if (reminder.state.on) {
+    reminder.disable();
+    renderReminder();
+    toast('运动闹钟已关闭');
+    return;
+  }
+
+  const r = await reminder.enable(state.reminderInterval);
+  if (!r.ok) {
+    if (r.reason === 'denied') toast('通知权限被拒绝，没法提醒你');
+    else if (r.reason === 'unsupported') toast('这个浏览器不支持系统通知');
+    else toast('开启失败，换个浏览器试试');
+    return;
+  }
+
+  sfx.init();
+  renderReminder();
+  toast('已开启，别关这个标签页');
+});
+
+el.reminderOff.addEventListener('click', () => {
+  reminder.disable();
+  renderReminder();
+  toast('运动闹钟已关闭');
+});
+
+el.reminderGo.addEventListener('click', () => {
+  hideReminderToast();
+  goFullscreen();
+  startChallenge();
+});
+
+el.reminderSnooze.addEventListener('click', () => {
+  hideReminderToast();
+  reminder.state.nextAt = Date.now() + 5 * 60000;
+  reminder.save();
+  toast('5 分钟后提醒你');
+});
+
+// 首次点击页面时初始化音频，否则到点没声音
+document.addEventListener('pointerdown', function once() {
+  sfx.init();
+  document.removeEventListener('pointerdown', once);
+}, { once: true });
+
+// 恢复上次的闹钟状态
+renderReminder();
+if (reminder.state.on) reminder.start();
 
 // 初始画布尺寸
 resizeCanvas();
