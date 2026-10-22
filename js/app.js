@@ -622,6 +622,7 @@ el.btnShare.addEventListener('click', async () => {
     const stamp = state.lastResult.dateStr.replace(/\./g, '');
     const r = await downloadOrShare(canvas, `不许坐着-${stamp}.png`);
     if (r === 'cancelled') text = '已取消';
+    else if (r === 'share-failed') text = '分享未完成';
     else if (r === 'failed') text = '生成失败';
   } catch (e) {
     text = '保存失败';
@@ -809,6 +810,7 @@ el.btnShareProfile.addEventListener('click', async () => {
     const canvas = makeProfileCard(store, store.stats(), dateStr);
     const r = await downloadOrShare(canvas, `不许坐着-我的记录-${dateStr.replace(/\./g, '')}.png`);
     if (r === 'cancelled') text = '已取消';
+    else if (r === 'share-failed') text = '分享未完成';
     else if (r === 'failed') text = '生成失败';
   } catch (e) {
     text = '生成失败';

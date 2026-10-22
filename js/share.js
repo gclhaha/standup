@@ -299,26 +299,34 @@ export function makeProfileCard(store, stats, dateStr) {
 }
 
 export async function downloadOrShare(canvas, filename) {
-  if (typeof navigator.canShare === 'function' && typeof navigator.share === 'function') {
-    try {
-      const blob = await new Promise((res) => canvas.toBlob(res, 'image/png'));
-      if (blob) {
-        const file = new File([blob], filename, { type: 'image/png' });
-        if (navigator.canShare({ files: [file] })) {
-          await navigator.share({ files: [file], title: '不许坐着' });
-          return 'shared';
-        }
-      }
-    } catch (e) {
-      if (e && e.name === 'AbortError') return 'cancelled';
-      // 其他错误才降级到下载
-    }
-  }
-
-  // 降级：用 Blob URL 下载，比超长 data URL 更稳
   const blob = await new Promise((res) => canvas.toBlob(res, 'image/png'));
   if (!blob) return 'failed';
 
+  // 只要浏览器支持文件分享，就只走分享这一条路，失败也不回退到下载。
+  // 之前出过"点一次出两份"的问题：系统分享抛了非 AbortError 的异常，
+  // 代码以为分享失败又下载了一张，结果系统那边其实已经存过了。
+  if (typeof navigator.canShare === 'function' && typeof navigator.share === 'function') {
+    let file = null;
+    let filesSupported = false;
+
+    try {
+      file = new File([blob], filename, { type: 'image/png' });
+      filesSupported = navigator.canShare({ files: [file] });
+    } catch (_) {
+      filesSupported = false;
+    }
+
+    if (filesSupported) {
+      try {
+        await navigator.share({ files: [file], title: '不许坐着' });
+        return 'shared';
+      } catch (e) {
+        return e && e.name === 'AbortError' ? 'cancelled' : 'share-failed';
+      }
+    }
+  }
+
+  // 不支持文件分享：下载，且只触发一次
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
   a.download = filename;
