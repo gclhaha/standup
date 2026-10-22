@@ -88,21 +88,21 @@ export class Skeleton {
     // 1. 外层光晕
     ctx.strokeStyle = glow;
     ctx.lineWidth = unit * 7 * pulse;
-    this.strokeBones(pts);
+    this.strokeBones(pts, landmarks);
     ctx.stroke();
 
     // 2. 主体
     ctx.strokeStyle = base;
     ctx.lineWidth = unit * 2.6 * pulse;
     ctx.globalAlpha = 0.85;
-    this.strokeBones(pts);
+    this.strokeBones(pts, landmarks);
     ctx.stroke();
 
     // 3. 内芯
     ctx.strokeStyle = core;
     ctx.lineWidth = unit * 0.9;
     ctx.globalAlpha = 1;
-    this.strokeBones(pts);
+    this.strokeBones(pts, landmarks);
     ctx.stroke();
 
     // 关节
@@ -156,13 +156,19 @@ export class Skeleton {
     ctx.globalAlpha = 1;
   }
 
-  strokeBones(pts) {
+  strokeBones(pts, landmarks) {
     const ctx = this.ctx;
     ctx.beginPath();
     for (const [a, b] of BONES) {
       const pa = pts[a];
       const pb = pts[b];
       if (!pa || !pb) continue;
+      // 置信度太低的骨段不画。镜头拍不到腿时，MediaPipe 会猜一个位置，
+      // 画出来是乱的，不如干脆省略。
+      if (landmarks) {
+        if ((landmarks[a]?.visibility ?? 1) < 0.35) continue;
+        if ((landmarks[b]?.visibility ?? 1) < 0.35) continue;
+      }
       ctx.moveTo(pa[0], pa[1]);
       ctx.lineTo(pb[0], pb[1]);
     }

@@ -39,6 +39,19 @@ function pickSensitivity() {
   return SENSITIVITY[level] || SENSITIVITY.normal;
 }
 
+/**
+ * 是否强制"全身入镜且站立"。
+ * 默认关闭——摄像头拍不到腿时（笔记本、手机前置、临时演示）也能正常玩。
+ * 需要严格模式时加 ?full=1。
+ */
+const ENFORCE_POSTURE = (() => {
+  try {
+    return new URLSearchParams(location.search).get('full') === '1';
+  } catch (_) {
+    return false;
+  }
+})();
+
 export class Tracker {
   constructor() {
     this.pose = null;
@@ -51,6 +64,7 @@ export class Tracker {
     this.detected = false;
     this.posture = { ok: false, reason: 'noPerson' };
     this.sitTime = 0;
+    this.enforcePosture = ENFORCE_POSTURE;
     this.onFrame = null;
     this.frames = 0;
     this.fpsT = 0;
@@ -101,11 +115,10 @@ export class Tracker {
       return;
     }
 
-    // 上半身要可信
-    const upperOk = (lm[11]?.visibility ?? 0) > 0.55 && (lm[12]?.visibility ?? 0) > 0.55;
+    // 至少躯干要可信，否则当成没检测到
     const conf = (lm[11]?.visibility ?? 0) + (lm[12]?.visibility ?? 0) +
                  (lm[23]?.visibility ?? 0) + (lm[24]?.visibility ?? 0);
-    this.detected = conf > 1.2 && upperOk;
+    this.detected = conf > 1.2;
 
     // 姿势校验：必须全身入镜，且不是坐着
     this.posture = this.checkPosture(lm, results.poseWorldLandmarks, dt);
@@ -160,6 +173,8 @@ export class Tracker {
    * 这一步是为了挡住两类误判：只露头摆头、以及坐在椅子上动上半身。
    */
   checkPosture(lm, world, dt) {
+    if (!this.enforcePosture) return { ok: true, reason: 'ok' };
+
     // 1. 下半身关键点必须真的看得见
     const lower = [23, 24, 25, 26, 27, 28];
     let visible = 0;
