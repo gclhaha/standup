@@ -23,19 +23,69 @@ function level(count) {
   return '';
 }
 
-export function renderHeatmap(store, container) {
-  const today = dayKey();
-  const days = store.recentDays(30);
+export function renderHeatmap(store, container, monthsEl, weeks = 26) {
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
 
-  container.innerHTML = days
-    .map((d) => {
-      const cls = level(d.count);
-      const isToday = d.key === today ? 'today' : '';
-      const skip = d.skips ? `，跳过 ${d.skips} 次` : '';
-      const label = `${d.key}　运动 ${d.count} 次${skip}`;
-      return `<i class="${cls} ${isToday}" title="${label}"></i>`;
-    })
-    .join('');
+  const dow = today.getDay(); // 0 = 周日
+  const weekStart = new Date(today);
+  weekStart.setDate(today.getDate() - dow);
+
+  // 最早那一周的周日
+  const start = new Date(weekStart);
+  start.setDate(weekStart.getDate() - (weeks - 1) * 7);
+
+  const todayKey = dayKey(today);
+  const parts = [];
+
+  // 按列填充：每一列是一周，七行对应周日到周六
+  for (let w = 0; w < weeks; w++) {
+    for (let d = 0; d < 7; d++) {
+      const date = new Date(start);
+      date.setDate(start.getDate() + w * 7 + d);
+      const key = dayKey(date);
+
+      if (date > today) {
+        parts.push('<i class="blank"></i>');
+        continue;
+      }
+
+      const rec = store.log.days[key];
+      const count = rec?.sessions?.length || 0;
+      const isToday = key === todayKey ? 'today' : '';
+      const skip = rec?.skips?.length ? `，跳过 ${rec.skips.length} 次` : '';
+      const label = `${key}　运动 ${count} 次${skip}`;
+
+      parts.push(`<i class="${level(count)} ${isToday}" title="${label}"></i>`);
+    }
+  }
+
+  container.innerHTML = parts.join('');
+
+  // 月份刻度：先切出每个月的列区间，跨度不足两列的（如起始那几天的残月）不标
+  if (monthsEl) {
+    const segs = [];
+
+    for (let w = 0; w < weeks; w++) {
+      const d = new Date(start);
+      d.setDate(start.getDate() + w * 7);
+      const m = d.getMonth();
+
+      if (!segs.length || segs[segs.length - 1].m !== m) {
+        segs.push({ m, start: w + 1, end: w + 1 });
+      } else {
+        segs[segs.length - 1].end = w + 1;
+      }
+    }
+
+    const labels = segs
+      .filter((s) => s.end - s.start >= 1)
+      .map((s) => ({ col: s.start, text: `${s.m + 1} 月` }));
+
+    monthsEl.innerHTML = labels
+      .map((l) => `<span style="grid-column: ${l.col}">${l.text}</span>`)
+      .join('');
+  }
 }
 
 export function renderRecent(store, container, limit = 12) {
@@ -69,7 +119,7 @@ export function renderProfile(store, el) {
   el.total.textContent = fmtDuration(s.totalSec);
   el.skips.textContent = String(s.totalSkips);
 
-  renderHeatmap(store, el.heatmap);
+  renderHeatmap(store, el.heatmap, el.heatmapMonths);
   renderRecent(store, el.recent);
 }
 

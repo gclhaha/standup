@@ -62,6 +62,7 @@ const el = {
   pTotal: $('p-total'),
   pSkips: $('p-skips'),
   heatmap: $('heatmap'),
+  heatmapMonths: $('heatmap-months'),
   recent: $('recent'),
   btnExportCsv: $('btn-export-csv'),
   btnExportJson: $('btn-export-json'),
@@ -779,6 +780,7 @@ function openProfile() {
     total: el.pTotal,
     skips: el.pSkips,
     heatmap: el.heatmap,
+    heatmapMonths: el.heatmapMonths,
     recent: el.recent
   });
   showScreen('profile');

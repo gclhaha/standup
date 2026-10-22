@@ -998,19 +998,47 @@ html, body {
   color: #6d7f7c;
 }
 
+.heatmap-wrap {
+  --hm-cell: 15px;
+  --hm-gap: 4px;
+  margin-top: 16px;
+}
+
+.heatmap-months {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: var(--hm-cell);
+  gap: var(--hm-gap);
+  height: 14px;
+  margin-bottom: 7px;
+  font-size: 9.5px;
+  letter-spacing: 0.03em;
+  color: #4f5d58;
+}
+
+.heatmap-months span {
+  grid-row: 1;
+  line-height: 14px;
+  white-space: nowrap;
+}
+
 .heatmap {
   display: grid;
-  grid-template-columns: repeat(15, 1fr);
-  gap: 5px;
-  margin-top: 16px;
+  grid-auto-flow: column;
+  grid-template-rows: repeat(7, var(--hm-cell));
+  grid-auto-columns: var(--hm-cell);
+  gap: var(--hm-gap);
 }
 
 .heatmap i {
   display: block;
-  aspect-ratio: 1 / 1;
-  border-radius: 3.5px;
+  border-radius: 3px;
   background: rgba(255, 255, 255, 0.045);
   transition: transform 0.15s;
+}
+
+.heatmap i.blank {
+  background: transparent;
 }
 
 .heatmap i:hover {
@@ -1121,5 +1149,6 @@ html, body {
   .nav-pill svg { width: 14px; height: 14px; }
   .profile-inner { width: calc(100% - 40px); }
   .profile-stats { grid-template-columns: repeat(2, 1fr); gap: 18px 10px; }
-  .heatmap { grid-template-columns: repeat(10, 1fr); }
+  .heatmap-wrap { --hm-cell: 13px; --hm-gap: 3px; }
+  .heatmap-months { font-size: 9px; }
 }
