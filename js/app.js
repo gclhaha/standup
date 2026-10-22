@@ -1,10 +1,10 @@
 import { Skeleton } from './skeleton.js';
 import { Tracker } from './tracker.js';
 import { Sfx } from './audio.js';
-import { makeShareCard, downloadOrShare } from './share.js';
+import { makeShareCard, makeProfileCard, downloadOrShare } from './share.js';
 import { Reminder } from './reminder.js';
 import { Store } from './store.js';
-import { renderProfile, exportCSV, exportJSON } from './profile.js';
+import { renderProfile, exportJSON } from './profile.js';
 
 const $ = (id) => document.getElementById(id);
 const DEBUG = new URLSearchParams(location.search).has('debug');
@@ -64,7 +64,9 @@ const el = {
   heatmap: $('heatmap'),
   heatmapMonths: $('heatmap-months'),
   recent: $('recent'),
-  btnExportCsv: $('btn-export-csv'),
+  btnShareProfile: $('btn-share-profile'),
+  btnImport: $('btn-import-json'),
+  importFile: $('import-file'),
   btnExportJson: $('btn-export-json'),
   btnClearData: $('btn-clear-data'),
   reminderSkip: $('reminder-skip'),
@@ -789,9 +791,60 @@ function openProfile() {
 el.fab.addEventListener('click', openProfile);
 el.btnProfileClose.addEventListener('click', () => showScreen('intro'));
 
-el.btnExportCsv.addEventListener('click', () => {
-  exportCSV(store);
-  toast('已导出 CSV');
+el.btnShareProfile.addEventListener('click', async () => {
+  if (state.sharing) return;
+
+  state.sharing = true;
+  const btn = el.btnShareProfile;
+  const label = btn.querySelector('span') || btn;
+  const original = label.textContent;
+  btn.disabled = true;
+  label.textContent = '正在生成…';
+
+  let text = '已保存';
+  try {
+    const d = new Date();
+    const p2 = (n) => String(n).padStart(2, '0');
+    const dateStr = `${d.getFullYear()}.${p2(d.getMonth() + 1)}.${p2(d.getDate())}`;
+    const canvas = makeProfileCard(store, store.stats(), dateStr);
+    const r = await downloadOrShare(canvas, `不许坐着-我的记录-${dateStr.replace(/\./g, '')}.png`);
+    if (r === 'cancelled') text = '已取消';
+    else if (r === 'failed') text = '生成失败';
+  } catch (e) {
+    text = '生成失败';
+    console.warn('share profile failed', e);
+  }
+
+  label.textContent = text;
+  setTimeout(() => {
+    label.textContent = original;
+    btn.disabled = false;
+    state.sharing = false;
+  }, 1500);
+});
+
+el.btnImport.addEventListener('click', () => el.importFile.click());
+
+el.importFile.addEventListener('change', async () => {
+  const file = el.importFile.files && el.importFile.files[0];
+  if (!file) return;
+
+  try {
+    const text = await file.text();
+    const r = store.importJSON(text);
+
+    if (!r.ok) {
+      toast(r.reason === 'parse' ? '文件内容不是有效的 JSON' : '这不是本应用的备份文件');
+      return;
+    }
+
+    openProfile();
+    toast(r.addedSessions > 0 ? `已恢复 ${r.addedSessions} 条记录` : '没有新记录，数据已经是最全的');
+  } catch (e) {
+    toast('导入失败，换个文件试试');
+  } finally {
+    el.importFile.value = '';
+  }
 });
 
 el.btnExportJson.addEventListener('click', () => {

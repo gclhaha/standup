@@ -267,6 +267,75 @@ export class Store {
     );
   }
 
+  /**
+   * 从备份文件恢复。按时间戳去重合并，不覆盖当前已有的记录，
+   * 这样重复导入同一份文件也不会产生重复数据。
+   */
+  importJSON(text) {
+    let data;
+    try {
+      data = JSON.parse(text);
+    } catch (_) {
+      return { ok: false, reason: 'parse' };
+    }
+
+    if (!data || typeof data !== 'object' || !data.log || !data.log.days) {
+      return { ok: false, reason: 'format' };
+    }
+    if (typeof data.log.days !== 'object') {
+      return { ok: false, reason: 'format' };
+    }
+
+    let addedSessions = 0;
+    let touchedDays = 0;
+
+    for (const [key, day] of Object.entries(data.log.days)) {
+      if (!/^\d{4}-\d{2}-\d{2}$/.test(key)) continue;
+      if (!day || typeof day !== 'object') continue;
+
+      const target = this.log.days[key] || (this.log.days[key] = { sessions: [], skips: [] });
+      if (!Array.isArray(target.sessions)) target.sessions = [];
+      if (!Array.isArray(target.skips)) target.skips = [];
+
+      const seenT = new Set(target.sessions.map((s) => s.t));
+      const list = Array.isArray(day.sessions) ? day.sessions : [];
+
+      for (const s of list) {
+        if (!s || typeof s.t !== 'number' || !isFinite(s.t)) continue;
+        if (seenT.has(s.t)) continue;
+        target.sessions.push({
+          t: s.t,
+          d: Number(s.d) || 0,
+          i: Number(s.i) || 0,
+          src: s.src === 'reminder' ? 'reminder' : 'manual'
+        });
+        seenT.add(s.t);
+        addedSessions++;
+      }
+
+      const seenK = new Set(target.skips.map((s) => s.t));
+      const skips = Array.isArray(day.skips) ? day.skips : [];
+
+      for (const k of skips) {
+        if (!k || typeof k.t !== 'number' || !isFinite(k.t)) continue;
+        if (seenK.has(k.t)) continue;
+        target.skips.push({ t: k.t, kind: k.kind || 'skip' });
+        seenK.add(k.t);
+      }
+
+      if (target.sessions.length) touchedDays++;
+    }
+
+    for (const k of Object.keys(this.log.days)) {
+      const d = this.log.days[k];
+      if (Array.isArray(d.sessions)) d.sessions.sort((a, b) => a.t - b.t);
+      if (Array.isArray(d.skips)) d.skips.sort((a, b) => a.t - b.t);
+    }
+
+    this.flush();
+    return { ok: true, addedSessions, touchedDays };
+  }
+
   clearAll() {
     this.log = { v: 1, days: {} };
     this.flush();

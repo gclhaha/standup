@@ -135,11 +135,6 @@ export function downloadFile(content, filename, mime) {
   setTimeout(() => URL.revokeObjectURL(url), 1500);
 }
 
-export function exportCSV(store) {
-  const stamp = dayKey().replace(/-/g, '');
-  downloadFile(store.toCSV(), `不许坐着-运动记录-${stamp}.csv`, 'text/csv;charset=utf-8');
-}
-
 export function exportJSON(store) {
   const stamp = dayKey().replace(/-/g, '');
   downloadFile(store.toJSON(), `不许坐着-备份-${stamp}.json`, 'application/json;charset=utf-8');

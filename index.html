@@ -192,10 +192,12 @@
       </div>
 
       <div class="profile-actions">
-        <button class="ghost sm" id="btn-export-csv" type="button"><span>导出 CSV</span></button>
+        <button class="primary sm" id="btn-share-profile" type="button"><span>分享我的记录</span></button>
         <button class="ghost sm" id="btn-export-json" type="button"><span>导出备份</span></button>
+        <button class="ghost sm" id="btn-import-json" type="button"><span>导入备份</span></button>
         <button class="ghost sm danger" id="btn-clear-data" type="button"><span>清空记录</span></button>
       </div>
+      <input type="file" id="import-file" accept=".json,application/json" hidden />
     </div>
   </section>
 
