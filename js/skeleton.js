@@ -74,9 +74,7 @@ export class Skeleton {
     const pts = landmarks.map((lm) => this.project(lm));
 
     // 强度决定色相：青绿(160) -> 琥珀(42) -> 赤红(2)
-    // 开方后低强度也能看出颜色变化，否则收紧阈值后骨架会一直是青的
-    const vivid = Math.pow(Math.min(1, Math.max(0, intensity)), 0.55);
-    const hue = 160 - vivid * 158;
+    const hue = 160 - Math.min(1, Math.max(0, intensity)) * 158;
     const base = `hsl(${hue}, 100%, 62%)`;
     const glow = `hsla(${hue}, 100%, 55%, 0.22)`;
     const core = `hsla(${hue}, 100%, 86%, 1)`;

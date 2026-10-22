@@ -68,6 +68,7 @@ const state = {
   everDetected: false,
   fsTimer: null,
   lastResult: null,
+  sharing: false,
   stream: null,
   warned: false,
   hiddenAt: 0,
@@ -260,10 +261,10 @@ function updateHud(d, active, dt) {
   } else if (state.idle > 1.2) {
     text = COACH.idle;
     cls = 'off';
-  } else if (d.intensity > 0.55) {
+  } else if (d.intensity > 0.62) {
     text = COACH.great;
     cls = 'hot';
-  } else if (d.intensity > 0.20) {
+  } else if (d.intensity > 0.28) {
     text = COACH.good;
     cls = 'hot';
   } else {
@@ -380,9 +381,9 @@ function finish() {
 
   const moved = state.moved;
   const avg = moved > 0 ? state.intensitySum / moved : 0;
-  const jumps = Math.round(moved * (0.45 + avg * 2.0));
+  const jumps = Math.round(moved * (0.35 + avg * 1.15));
 
-  const tier = avg > 0.40 ? 'high' : avg > 0.17 ? 'mid' : 'low';
+  const tier = avg > 0.55 ? 'high' : avg > 0.3 ? 'mid' : 'low';
   const [title, sub] = pick(RESULT_LINES[tier]);
 
   el.resultEyebrow.textContent = `${state.duration} 秒挑战完成`;
@@ -490,14 +491,34 @@ el.btnHome.addEventListener('click', () => {
 });
 
 el.btnShare.addEventListener('click', async () => {
-  if (!state.lastResult) return;
+  if (!state.lastResult || state.sharing) return;
+
+  state.sharing = true;
+  const btn = el.btnShare;
+  const label = btn.querySelector('span') || btn;
+  const original = label.textContent;
+
+  btn.disabled = true;
+  label.textContent = '正在生成…';
+
+  let text = '已保存';
   try {
     const canvas = makeShareCard(state.lastResult);
     const stamp = state.lastResult.dateStr.replace(/\./g, '');
-    await downloadOrShare(canvas, `不许坐着-${stamp}.png`);
+    const r = await downloadOrShare(canvas, `不许坐着-${stamp}.png`);
+    if (r === 'cancelled') text = '已取消';
+    else if (r === 'failed') text = '生成失败';
   } catch (e) {
+    text = '保存失败';
     console.warn('share failed', e);
   }
+
+  label.textContent = text;
+  setTimeout(() => {
+    label.textContent = original;
+    btn.disabled = false;
+    state.sharing = false;
+  }, 1500);
 });
 
 // 长按退出

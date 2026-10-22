@@ -135,11 +135,10 @@ export function makeShareCard({ seconds, intensity, jumps, title, dateStr }) {
 }
 
 export async function downloadOrShare(canvas, filename) {
-  const dataUrl = canvas.toDataURL('image/png');
-
-  // 优先调用系统分享（移动端）
-  try {
-    if (navigator.canShare) {
+  // 优先走系统分享面板。注意：用户取消分享时不能再降级成下载，
+  // 否则会出现"点了没反应，回头发现多出一张图"的情况。
+  if (typeof navigator.canShare === 'function' && typeof navigator.share === 'function') {
+    try {
       const blob = await new Promise((res) => canvas.toBlob(res, 'image/png'));
       if (blob) {
         const file = new File([blob], filename, { type: 'image/png' });
@@ -148,16 +147,23 @@ export async function downloadOrShare(canvas, filename) {
           return 'shared';
         }
       }
+    } catch (e) {
+      if (e && e.name === 'AbortError') return 'cancelled';
+      // 其他错误才降级到下载
     }
-  } catch (_) {
-    // 用户取消分享，继续走下载
   }
 
+  // 降级：用 Blob URL 下载，比超长 data URL 更稳
+  const blob = await new Promise((res) => canvas.toBlob(res, 'image/png'));
+  if (!blob) return 'failed';
+
+  const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
   a.download = filename;
-  a.href = dataUrl;
+  a.href = url;
   document.body.appendChild(a);
   a.click();
   a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 1500);
   return 'downloaded';
 }

@@ -22,7 +22,7 @@ const BODY = [
  *   scale     强度归一化除数，调大 = 同样的动作得到的强度更低
  *   activeAt  判定为"运动中"的最低强度，调大 = 门槛更高
  *
- * 地址栏加 ?sens=low / ?sens=high 可以切换，默认 mid。
+ * 默认 high（即最早的手感）。地址栏加 ?sens=mid / ?sens=low 可以调严格。
  */
 const SENSITIVITY = {
   high: { deadZone: 0.10, scale: 1.55, activeAt: 0.14 },
@@ -31,11 +31,11 @@ const SENSITIVITY = {
 };
 
 function pickSensitivity() {
-  let level = 'mid';
+  let level = 'high';
   try {
-    level = new URLSearchParams(location.search).get('sens') || 'mid';
+    level = new URLSearchParams(location.search).get('sens') || 'high';
   } catch (_) {}
-  return SENSITIVITY[level] || SENSITIVITY.mid;
+  return SENSITIVITY[level] || SENSITIVITY.high;
 }
 
 export class Tracker {
