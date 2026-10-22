@@ -79,7 +79,11 @@ const state = {
 };
 
 const COACH = {
-  noPerson: '退后一步，让全身进入画面',
+  noPerson: '站到镜头前',
+  noLower: '退后一点，让腿也进画面',
+  feetOut: '脚出画面了，再退一步',
+  tooClose: '太近了，退后让全身进画面',
+  sitting: '站起来，坐着不算',
   idle: '停下不算数，继续动',
   low: '幅度再大一点',
   good: '很好，就这样',
@@ -214,7 +218,7 @@ function onFrame(d) {
 
   if (!state.running) return;
 
-  if (d.detected) state.everDetected = true;
+  if (d.detected && d.postureOk) state.everDetected = true;
 
   const active = d.active;
 
@@ -258,13 +262,16 @@ function updateHud(d, active, dt) {
   if (!d.detected) {
     text = COACH.noPerson;
     cls = 'off';
+  } else if (!d.postureOk) {
+    text = COACH[d.posture.reason] || COACH.noLower;
+    cls = 'off';
   } else if (state.idle > 1.2) {
     text = COACH.idle;
     cls = 'off';
-  } else if (d.intensity > 0.62) {
+  } else if (d.intensity > 0.55) {
     text = COACH.great;
     cls = 'hot';
-  } else if (d.intensity > 0.28) {
+  } else if (d.intensity > 0.24) {
     text = COACH.good;
     cls = 'hot';
   } else {
@@ -282,9 +289,11 @@ function updateHud(d, active, dt) {
     ? `m ${d.motion.toFixed(2)} / 需 ${d.trigger.toFixed(2)}`
     : !d.detected
       ? '未检测到人体'
-      : active
-        ? '运动中'
-        : '静止';
+      : !d.postureOk
+        ? '需要全身入镜'
+        : active
+          ? '运动中'
+          : '静止';
 
   // 告警
   const sinceStart = (performance.now() - state.startedAt) / 1000;
@@ -296,7 +305,11 @@ function updateHud(d, active, dt) {
     el.edgeAlarm.classList.toggle('on', alarm);
     el.alarmWord.classList.toggle('on', alarm);
     if (alarm) {
-      el.alarmWord.textContent = d.detected ? '继续动！' : '看不到你';
+      el.alarmWord.textContent = !d.detected
+        ? '看不到你'
+        : !d.postureOk
+          ? (d.posture.reason === 'sitting' ? '站起来' : '退后一点')
+          : '继续动！';
       sfx.warn();
     }
   }
@@ -383,7 +396,7 @@ function finish() {
   const avg = moved > 0 ? state.intensitySum / moved : 0;
   const jumps = Math.round(moved * (0.35 + avg * 1.15));
 
-  const tier = avg > 0.55 ? 'high' : avg > 0.3 ? 'mid' : 'low';
+  const tier = avg > 0.50 ? 'high' : avg > 0.26 ? 'mid' : 'low';
   const [title, sub] = pick(RESULT_LINES[tier]);
 
   el.resultEyebrow.textContent = `${state.duration} 秒挑战完成`;
