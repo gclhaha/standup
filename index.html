@@ -154,13 +154,17 @@
   <section class="screen" id="profile">
     <div class="grain"></div>
     <div class="profile-inner">
-      <header class="profile-head">
-        <div>
-          <p class="eyebrow">个人中心</p>
-          <h2 class="profile-title">我的记录</h2>
-        </div>
-        <button class="ghost sm" id="btn-profile-close" type="button"><span>返回</span></button>
-      </header>
+      <div class="profile-topbar">
+        <button class="back-btn" id="btn-profile-close" type="button">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M15 18l-6-6 6-6" />
+          </svg>
+          <span>返回</span>
+        </button>
+      </div>
+
+      <p class="eyebrow">个人中心</p>
+      <h2 class="profile-title">我的记录</h2>
 
       <div class="profile-stats">
         <div class="pstat"><b id="p-streak">0</b><span>连续天数</span></div>
@@ -193,10 +197,11 @@
   </section>
 
   <!-- 常驻入口 -->
-  <button class="fab" id="btn-profile" type="button" aria-label="我的记录">
+  <button class="nav-pill" id="btn-profile" type="button">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round">
       <path d="M4 19v-6M9.5 19V6M15 19v-8M20.5 19V9" />
     </svg>
+    <span>我的记录</span>
   </button>
 
   <!-- ========== 错误层 ========== -->

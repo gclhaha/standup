@@ -859,38 +859,44 @@ html, body {
 
 /* ---------------- 个人中心 ---------------- */
 
-.fab {
+.nav-pill {
   position: fixed;
-  left: 40px;
-  bottom: 34px;
+  top: 34px;
+  right: 40px;
   z-index: 30;
-  width: 42px;
-  height: 42px;
-  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 16px 9px 13px;
+  border-radius: 999px;
   border: 1px solid rgba(255, 255, 255, 0.1);
-  background: rgba(255, 255, 255, 0.03);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  color: rgba(232, 240, 255, 0.55);
-  display: grid;
-  place-items: center;
+  background: rgba(255, 255, 255, 0.035);
+  backdrop-filter: blur(14px) saturate(1.4);
+  -webkit-backdrop-filter: blur(14px) saturate(1.4);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06);
+  color: rgba(232, 240, 255, 0.62);
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 300;
+  letter-spacing: 0.08em;
   cursor: pointer;
-  transition: color 0.25s, border-color 0.25s, box-shadow 0.25s, background 0.25s;
+  transition: color 0.25s, border-color 0.25s, box-shadow 0.25s, background 0.25s, opacity 0.25s;
 }
 
-.fab svg {
-  width: 18px;
-  height: 18px;
+.nav-pill svg {
+  width: 15px;
+  height: 15px;
+  opacity: 0.9;
 }
 
-.fab:hover {
+.nav-pill:hover {
   color: var(--mint);
-  border-color: rgba(59, 255, 193, 0.4);
+  border-color: rgba(59, 255, 193, 0.38);
   background: rgba(59, 255, 193, 0.06);
-  box-shadow: 0 0 26px rgba(59, 255, 193, 0.16);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06), 0 0 26px rgba(59, 255, 193, 0.14);
 }
 
-.fab.hidden {
+.nav-pill.hidden {
   opacity: 0;
   pointer-events: none;
 }
@@ -909,11 +915,39 @@ html, body {
   margin: 0 auto;
 }
 
-.profile-head {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 16px;
+.profile-topbar {
+  margin-bottom: 22px;
+}
+
+.back-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  margin-left: -11px;
+  padding: 8px 14px 8px 11px;
+  border: none;
+  border-radius: 999px;
+  background: none;
+  color: var(--mint);
+  font-family: inherit;
+  font-size: 13.5px;
+  font-weight: 400;
+  letter-spacing: 0.04em;
+  cursor: pointer;
+  transition: background 0.2s, opacity 0.2s;
+}
+
+.back-btn svg {
+  width: 17px;
+  height: 17px;
+}
+
+.back-btn:hover {
+  background: rgba(59, 255, 193, 0.09);
+}
+
+.back-btn:active {
+  opacity: 0.55;
 }
 
 .profile-title {
@@ -1077,7 +1111,14 @@ html, body {
 }
 
 @media (max-width: 640px) {
-  .fab { left: 20px; bottom: 20px; width: 38px; height: 38px; }
+  .nav-pill {
+    top: 20px;
+    right: 20px;
+    padding: 7px 13px 7px 11px;
+    font-size: 11px;
+    gap: 6px;
+  }
+  .nav-pill svg { width: 14px; height: 14px; }
   .profile-inner { width: calc(100% - 40px); }
   .profile-stats { grid-template-columns: repeat(2, 1fr); gap: 18px 10px; }
   .heatmap { grid-template-columns: repeat(10, 1fr); }
