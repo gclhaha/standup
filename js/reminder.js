@@ -5,10 +5,9 @@
  * Chrome 对后台标签的定时器会节流到每分钟一次，所以这里不用一次性 setTimeout，
  * 而是每次比对绝对时间戳——即使被节流，最多晚一分钟，不会错过。
  *
- * 状态存在 localStorage，刷新或第二天重新打开都能恢复。
+ * 配置由外部注入（Store.config），这里只负责计时和发通知。
  */
 
-const STORE_KEY = 'standup.reminder.v1';
 const TITLE_BASE = '不许坐着 · 关不掉的运动闹钟';
 
 const LINES = [
@@ -63,32 +62,27 @@ function pad(n) {
 }
 
 export class Reminder {
-  constructor({ onFire, onActivate, onTick } = {}) {
+  /**
+   * @param {object} opts
+   * @param {object} opts.config    Store.config 的引用，直接读写
+   * @param {Function} opts.onChange 配置变化时回调（用于落盘）
+   */
+  constructor({ config, onChange, onFire, onActivate, onTick } = {}) {
+    this.cfg = config || { interval: 60, reminderOn: false, nextAt: 0 };
+    this.onChange = onChange || (() => {});
     this.onFire = onFire || (() => {});
     this.onActivate = onActivate || (() => {});
     this.onTick = onTick || (() => {});
-    this.state = { on: false, interval: 60, nextAt: 0 };
     this.timer = null;
     this.icon = null;
-    this.load();
   }
 
-  load() {
-    try {
-      const raw = localStorage.getItem(STORE_KEY);
-      if (!raw) return;
-      const s = JSON.parse(raw);
-      if (!s || typeof s !== 'object') return;
-      this.state.on = !!s.on;
-      this.state.interval = Math.min(240, Math.max(5, Number(s.interval) || 60));
-      this.state.nextAt = Number(s.nextAt) || 0;
-    } catch (_) {}
+  get on() {
+    return !!this.cfg.reminderOn;
   }
 
-  save() {
-    try {
-      localStorage.setItem(STORE_KEY, JSON.stringify(this.state));
-    } catch (_) {}
+  get interval() {
+    return this.cfg.interval || 60;
   }
 
   get supported() {
@@ -100,8 +94,8 @@ export class Reminder {
   }
 
   get remainMs() {
-    if (!this.state.on) return 0;
-    return Math.max(0, this.state.nextAt - Date.now());
+    if (!this.on) return 0;
+    return Math.max(0, (this.cfg.nextAt || 0) - Date.now());
   }
 
   /** 必须在用户手势里调用，否则浏览器不给权限 */
@@ -118,30 +112,55 @@ export class Reminder {
     }
     if (perm !== 'granted') return { ok: false, reason: 'denied' };
 
-    this.state.on = true;
-    this.state.interval = intervalMinutes;
-    this.state.nextAt = Date.now() + intervalMinutes * 60000;
-    this.save();
+    this.cfg.reminderOn = true;
+    this.cfg.interval = intervalMinutes;
+    this.cfg.nextAt = Date.now() + intervalMinutes * 60000;
+    this.onChange();
     this.start();
-    return { ok: true, nextAt: this.state.nextAt };
+    return { ok: true, nextAt: this.cfg.nextAt };
   }
 
   disable() {
-    this.state.on = false;
-    this.state.nextAt = 0;
-    this.save();
+    this.cfg.reminderOn = false;
+    this.cfg.nextAt = 0;
+    this.onChange();
     this.stop();
     document.title = TITLE_BASE;
   }
 
+  /** 顺延，不算放弃 */
+  snooze(ms = 5 * 60000) {
+    this.cfg.nextAt = Date.now() + ms;
+    this.onChange();
+    this.updateTitle();
+  }
+
+  /** 今天都不再提醒，明早（或下次手动开启）恢复 */
+  dismissToday() {
+    const end = new Date();
+    end.setHours(23, 59, 59, 0);
+    this.cfg.nextAt = end.getTime() + 1000;
+    this.onChange();
+    this.updateTitle();
+  }
+
+  setIntervalMinutes(min) {
+    this.cfg.interval = min;
+    if (this.on) {
+      this.cfg.nextAt = Date.now() + min * 60000;
+    }
+    this.onChange();
+    this.updateTitle();
+  }
+
   start() {
     this.stop();
-    if (!this.state.on) return;
+    if (!this.on) return;
 
     // 隔了很久再打开：重新计时，而不是立刻炸一次
-    if (this.state.nextAt <= Date.now()) {
-      this.state.nextAt = Date.now() + this.state.interval * 60000;
-      this.save();
+    if (!this.cfg.nextAt || this.cfg.nextAt <= Date.now()) {
+      this.cfg.nextAt = Date.now() + this.interval * 60000;
+      this.onChange();
     }
 
     this.timer = setInterval(() => this.tick(), 1000);
@@ -154,12 +173,12 @@ export class Reminder {
   }
 
   tick() {
-    if (!this.state.on) return;
+    if (!this.on) return;
 
-    if (Date.now() >= this.state.nextAt) {
+    if (Date.now() >= this.cfg.nextAt) {
       this.fire();
-      this.state.nextAt = Date.now() + this.state.interval * 60000;
-      this.save();
+      this.cfg.nextAt = Date.now() + this.interval * 60000;
+      this.onChange();
     }
     this.updateTitle();
     try {
@@ -199,19 +218,21 @@ export class Reminder {
         } catch (_) {}
       };
     } catch (_) {
-      // 某些环境（如移动端部分浏览器）不允许直接构造，忽略即可，页面内提示仍会显示
+      // 部分环境不允许直接构造通知，忽略即可，页面内浮层仍会出现
     }
   }
 
   updateTitle() {
-    if (!this.state.on) return;
+    if (!this.on) {
+      document.title = TITLE_BASE;
+      return;
+    }
     const ms = this.remainMs;
     const m = Math.floor(ms / 60000);
     const s = Math.floor((ms % 60000) / 1000);
     document.title = `(${m}:${pad(s)}) 不许坐着`;
   }
 
-  /** 给界面用的可读倒计时 */
   remainText() {
     const ms = this.remainMs;
     if (ms <= 0) return '即将提醒';
@@ -221,8 +242,8 @@ export class Reminder {
   }
 
   nextTimeText() {
-    if (!this.state.nextAt) return '';
-    const d = new Date(this.state.nextAt);
+    if (!this.cfg.nextAt) return '';
+    const d = new Date(this.cfg.nextAt);
     return `${pad(d.getHours())}:${pad(d.getMinutes())}`;
   }
 }

@@ -75,6 +75,7 @@
     <p class="reminder-toast-sub">坐着的时间够了，动 30 秒就回来。</p>
     <div class="reminder-toast-actions">
       <button class="primary sm" id="reminder-go" type="button"><span>现在开始</span></button>
+      <button class="ghost sm" id="reminder-skip" type="button"><span>跳过本次</span></button>
       <button class="ghost sm" id="reminder-snooze" type="button"><span>缓 5 分钟</span></button>
     </div>
   </div>
@@ -148,6 +149,55 @@
       </div>
     </div>
   </section>
+
+  <!-- ========== 个人中心 ========== -->
+  <section class="screen" id="profile">
+    <div class="grain"></div>
+    <div class="profile-inner">
+      <header class="profile-head">
+        <div>
+          <p class="eyebrow">个人中心</p>
+          <h2 class="profile-title">我的记录</h2>
+        </div>
+        <button class="ghost sm" id="btn-profile-close" type="button"><span>返回</span></button>
+      </header>
+
+      <div class="profile-stats">
+        <div class="pstat"><b id="p-streak">0</b><span>连续天数</span></div>
+        <div class="pstat"><b id="p-week">0</b><span>本周次数</span></div>
+        <div class="pstat"><b id="p-total">0</b><span>累计时长</span></div>
+        <div class="pstat"><b id="p-skips">0</b><span>跳过次数</span></div>
+      </div>
+
+      <div class="section-block">
+        <p class="section-title">近 30 天</p>
+        <div class="heatmap" id="heatmap"></div>
+        <div class="heatmap-legend">
+          <span>少</span>
+          <i class="lv0"></i><i class="lv1"></i><i class="lv2"></i><i class="lv3"></i>
+          <span>多</span>
+        </div>
+      </div>
+
+      <div class="section-block">
+        <p class="section-title">最近记录</p>
+        <ul class="recent" id="recent"></ul>
+      </div>
+
+      <div class="profile-actions">
+        <button class="ghost sm" id="btn-export-csv" type="button"><span>导出 CSV</span></button>
+        <button class="ghost sm" id="btn-export-json" type="button"><span>导出备份</span></button>
+        <button class="ghost sm danger" id="btn-clear-data" type="button"><span>清空记录</span></button>
+      </div>
+    </div>
+  </section>
+
+  <!-- 常驻入口 -->
+  <button class="fab" id="btn-profile" type="button" aria-label="我的记录">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round">
+      <path d="M4 19v-6M9.5 19V6M15 19v-8M20.5 19V9" />
+    </svg>
+  </button>
 
   <!-- ========== 错误层 ========== -->
   <div class="fatal" id="fatal">

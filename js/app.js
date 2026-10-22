@@ -3,6 +3,8 @@ import { Tracker } from './tracker.js';
 import { Sfx } from './audio.js';
 import { makeShareCard, downloadOrShare } from './share.js';
 import { Reminder } from './reminder.js';
+import { Store } from './store.js';
+import { renderProfile, exportCSV, exportJSON } from './profile.js';
 
 const $ = (id) => document.getElementById(id);
 const DEBUG = new URLSearchParams(location.search).has('debug');
@@ -52,6 +54,20 @@ const el = {
   btnRetry: $('btn-retry'),
   toast: $('toast'),
 
+  fab: $('btn-profile'),
+  profile: $('profile'),
+  btnProfileClose: $('btn-profile-close'),
+  pStreak: $('p-streak'),
+  pWeek: $('p-week'),
+  pTotal: $('p-total'),
+  pSkips: $('p-skips'),
+  heatmap: $('heatmap'),
+  recent: $('recent'),
+  btnExportCsv: $('btn-export-csv'),
+  btnExportJson: $('btn-export-json'),
+  btnClearData: $('btn-clear-data'),
+  reminderSkip: $('reminder-skip'),
+
   reminderCard: $('reminder-card'),
   reminderSwitch: $('reminder-switch'),
   reminderIntervals: $('reminder-intervals'),
@@ -63,13 +79,14 @@ const el = {
   reminderSnooze: $('reminder-snooze')
 };
 
+const store = new Store();
 const skeleton = new Skeleton(el.overlay);
 const tracker = new Tracker();
 const sfx = new Sfx();
 
 const state = {
   screen: 'intro',
-  duration: 30,
+  duration: store.config.duration || 30,
   elapsed: 0,
   moved: 0,
   intensitySum: 0,
@@ -88,12 +105,15 @@ const state = {
   fpsTime: 0,
   fps: 0,
   lastCoach: '',
-  reminderInterval: 60
+  reminderInterval: 60,
+  challengeSource: 'manual'
 };
 
 /* ---------------- 运动闹钟 ---------------- */
 
 const reminder = new Reminder({
+  config: store.config,
+  onChange: () => store.saveConfig(),
   onFire: () => {
     if (state.running) return; // 正在挑战就别打扰
     sfx.warn();
@@ -103,11 +123,11 @@ const reminder = new Reminder({
     hideReminderToast();
     if (state.screen !== 'stage') {
       goFullscreen();
-      startChallenge();
+      startChallenge('reminder');
     }
   },
   onTick: () => {
-    if (reminder.state.on) {
+    if (reminder.on) {
       el.reminderCountdown.textContent = reminder.remainText();
     }
   }
@@ -136,11 +156,11 @@ function hideReminderToast() {
 }
 
 function renderReminder() {
-  const on = reminder.state.on;
+  const on = reminder.on;
   el.reminderCard.classList.toggle('on', on);
   el.reminderSwitch.setAttribute('aria-checked', on ? 'true' : 'false');
   el.reminderSub.textContent = on
-    ? `每 ${reminder.state.interval} 分钟提醒一次`
+    ? `每 ${reminder.interval} 分钟提醒一次`
     : '每隔一段时间提醒你起身，标签页开着就行';
 }
 
@@ -185,6 +205,10 @@ function showScreen(name) {
   el.intro.classList.toggle('active', name === 'intro');
   el.stage.classList.toggle('active', name === 'stage');
   el.result.classList.toggle('active', name === 'result');
+  el.profile.classList.toggle('active', name === 'profile');
+
+  // 挑战中和个人中心里都藏起入口，避免误触
+  el.fab.classList.toggle('hidden', name === 'stage' || name === 'profile');
 }
 
 /* ---------------- 全屏 ---------------- */
@@ -392,7 +416,8 @@ function updateHud(d, active, dt) {
 
 /* ---------------- 挑战流程 ---------------- */
 
-async function startChallenge() {
+async function startChallenge(source = 'manual') {
+  state.challengeSource = source;
   state.elapsed = 0;
   state.moved = 0;
   state.intensitySum = 0;
@@ -482,6 +507,12 @@ function finish() {
     dateStr: `${d.getFullYear()}.${pad(d.getMonth() + 1)}.${pad(d.getDate())}`
   };
 
+  store.addSession({
+    seconds: moved,
+    intensity: avg,
+    src: state.challengeSource
+  });
+
   sfx.win();
   el.edgeAlarm.classList.remove('on');
   el.alarmWord.classList.remove('on');
@@ -546,6 +577,8 @@ el.chips.forEach((chip) => {
     chip.classList.add('active');
     state.duration = Number(chip.dataset.duration);
     el.ledeSec.textContent = state.duration;
+    store.config.duration = state.duration;
+    store.saveConfig();
   });
 });
 
@@ -668,6 +701,15 @@ window.addEventListener('beforeunload', (e) => {
 
 /* ---------------- 运动闹钟交互 ---------------- */
 
+// 把上次保存的配置回填到界面，避免每次都要重设
+el.chips.forEach((c) => c.classList.toggle('active', Number(c.dataset.duration) === state.duration));
+el.ledeSec.textContent = state.duration;
+
+state.reminderInterval = reminder.interval;
+el.reminderIntervals.querySelectorAll('.chip').forEach((c) => {
+  c.classList.toggle('active', Number(c.dataset.min) === reminder.interval);
+});
+
 el.reminderIntervals.addEventListener('click', (e) => {
   const btn = e.target.closest('.chip');
   if (!btn) return;
@@ -677,7 +719,7 @@ el.reminderIntervals.addEventListener('click', (e) => {
 });
 
 el.reminderSwitch.addEventListener('click', async () => {
-  if (reminder.state.on) {
+  if (reminder.on) {
     reminder.disable();
     renderReminder();
     toast('运动闹钟已关闭');
@@ -706,13 +748,19 @@ el.reminderOff.addEventListener('click', () => {
 el.reminderGo.addEventListener('click', () => {
   hideReminderToast();
   goFullscreen();
-  startChallenge();
+  startChallenge('reminder');
+});
+
+el.reminderSkip.addEventListener('click', () => {
+  hideReminderToast();
+  store.addSkip('skip');
+  toast('已跳过这一轮');
 });
 
 el.reminderSnooze.addEventListener('click', () => {
   hideReminderToast();
-  reminder.state.nextAt = Date.now() + 5 * 60000;
-  reminder.save();
+  store.addSkip('snooze');
+  reminder.snooze();
   toast('5 分钟后提醒你');
 });
 
@@ -722,9 +770,60 @@ document.addEventListener('pointerdown', function once() {
   document.removeEventListener('pointerdown', once);
 }, { once: true });
 
+/* ---------------- 个人中心 ---------------- */
+
+function openProfile() {
+  renderProfile(store, {
+    streak: el.pStreak,
+    week: el.pWeek,
+    total: el.pTotal,
+    skips: el.pSkips,
+    heatmap: el.heatmap,
+    recent: el.recent
+  });
+  showScreen('profile');
+}
+
+el.fab.addEventListener('click', openProfile);
+el.btnProfileClose.addEventListener('click', () => showScreen('intro'));
+
+el.btnExportCsv.addEventListener('click', () => {
+  exportCSV(store);
+  toast('已导出 CSV');
+});
+
+el.btnExportJson.addEventListener('click', () => {
+  exportJSON(store);
+  toast('已导出备份');
+});
+
+let clearArmed = false;
+let clearTimer = null;
+
+el.btnClearData.addEventListener('click', () => {
+  const label = el.btnClearData.querySelector('span') || el.btnClearData;
+
+  if (!clearArmed) {
+    clearArmed = true;
+    label.textContent = '再点一次确认';
+    clearTimer = setTimeout(() => {
+      clearArmed = false;
+      label.textContent = '清空记录';
+    }, 3200);
+    return;
+  }
+
+  clearTimeout(clearTimer);
+  clearArmed = false;
+  label.textContent = '清空记录';
+  store.clearAll();
+  openProfile();
+  toast('记录已清空');
+});
+
 // 恢复上次的闹钟状态
 renderReminder();
-if (reminder.state.on) reminder.start();
+if (reminder.on) reminder.start();
 
 // 初始画布尺寸
 resizeCanvas();
