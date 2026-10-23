@@ -46,7 +46,7 @@ http.createServer((req, res) => {
     fs.createReadStream(file).pipe(res);
   });
 }).listen(PORT, '127.0.0.1', () => {
-  console.log(`\n  不许坐着 · 本地预览已启动`);
+  console.log(`\n  起身 · 本地预览已启动`);
   console.log(`  http://127.0.0.1:${PORT}\n`);
   console.log(`  按 Ctrl+C 停止\n`);
 });

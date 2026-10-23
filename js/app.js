@@ -76,7 +76,6 @@ const el = {
   reminderIntervals: $('reminder-intervals'),
   reminderCountdown: $('reminder-countdown'),
   reminderSub: $('reminder-sub'),
-  reminderOff: $('reminder-off'),
   reminderToast: $('reminder-toast'),
   reminderGo: $('reminder-go'),
   reminderSnooze: $('reminder-snooze')
@@ -112,7 +111,7 @@ const state = {
   challengeSource: 'manual'
 };
 
-/* ---------------- 运动闹钟 ---------------- */
+/* ---------------- 久坐提醒 ---------------- */
 
 const reminder = new Reminder({
   config: store.config,
@@ -164,7 +163,7 @@ function renderReminder() {
   el.reminderSwitch.setAttribute('aria-checked', on ? 'true' : 'false');
   el.reminderSub.textContent = on
     ? `每 ${reminder.interval} 分钟提醒一次`
-    : '每隔一段时间提醒你起身，标签页开着就行';
+    : '按你设的间隔提醒，标签页开着就行';
 }
 
 const COACH = {
@@ -620,7 +619,7 @@ el.btnShare.addEventListener('click', async () => {
   try {
     const canvas = makeShareCard(state.lastResult);
     const stamp = state.lastResult.dateStr.replace(/\./g, '');
-    const r = await downloadOrShare(canvas, `不许坐着-${stamp}.png`);
+    const r = await downloadOrShare(canvas, `起身-${stamp}.png`);
     if (r === 'cancelled') text = '已取消';
     else if (r === 'share-failed') text = '分享未完成';
     else if (r === 'failed') text = '生成失败';
@@ -703,7 +702,7 @@ window.addEventListener('beforeunload', (e) => {
   }
 });
 
-/* ---------------- 运动闹钟交互 ---------------- */
+/* ---------------- 久坐提醒交互 ---------------- */
 
 // 把上次保存的配置回填到界面，避免每次都要重设
 el.chips.forEach((c) => c.classList.toggle('active', Number(c.dataset.duration) === state.duration));
@@ -726,7 +725,7 @@ el.reminderSwitch.addEventListener('click', async () => {
   if (reminder.on) {
     reminder.disable();
     renderReminder();
-    toast('运动闹钟已关闭');
+    toast('久坐提醒已关闭');
     return;
   }
 
@@ -741,12 +740,6 @@ el.reminderSwitch.addEventListener('click', async () => {
   sfx.init();
   renderReminder();
   toast('已开启，别关这个标签页');
-});
-
-el.reminderOff.addEventListener('click', () => {
-  reminder.disable();
-  renderReminder();
-  toast('运动闹钟已关闭');
 });
 
 el.reminderGo.addEventListener('click', () => {
@@ -808,7 +801,7 @@ el.btnShareProfile.addEventListener('click', async () => {
     const p2 = (n) => String(n).padStart(2, '0');
     const dateStr = `${d.getFullYear()}.${p2(d.getMonth() + 1)}.${p2(d.getDate())}`;
     const canvas = makeProfileCard(store, store.stats(), dateStr);
-    const r = await downloadOrShare(canvas, `不许坐着-我的记录-${dateStr.replace(/\./g, '')}.png`);
+    const r = await downloadOrShare(canvas, `起身-我的记录-${dateStr.replace(/\./g, '')}.png`);
     if (r === 'cancelled') text = '已取消';
     else if (r === 'share-failed') text = '分享未完成';
     else if (r === 'failed') text = '生成失败';

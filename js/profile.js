@@ -137,5 +137,5 @@ export function downloadFile(content, filename, mime) {
 
 export function exportJSON(store) {
   const stamp = dayKey().replace(/-/g, '');
-  downloadFile(store.toJSON(), `不许坐着-备份-${stamp}.json`, 'application/json;charset=utf-8');
+  downloadFile(store.toJSON(), `起身-备份-${stamp}.json`, 'application/json;charset=utf-8');
 }

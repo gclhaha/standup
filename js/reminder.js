@@ -8,7 +8,7 @@
  * 配置由外部注入（Store.config），这里只负责计时和发通知。
  */
 
-const TITLE_BASE = '不许坐着 · 关不掉的运动闹钟';
+const TITLE_BASE = '起身 · 坐久了，起来动一动';
 
 const LINES = [
   ['起来动一下', '30 秒，就差你了。'],
@@ -230,7 +230,7 @@ export class Reminder {
     const ms = this.remainMs;
     const m = Math.floor(ms / 60000);
     const s = Math.floor((ms % 60000) / 1000);
-    document.title = `(${m}:${pad(s)}) 不许坐着`;
+    document.title = `(${m}:${pad(s)}) 起身`;
   }
 
   remainText() {

@@ -60,7 +60,7 @@ export function makeShareCard({ seconds, intensity, jumps, title, dateStr }) {
   // 顶部标识
   ctx.fillStyle = 'rgba(59, 255, 193, 0.92)';
   setFont(ctx, 27, 500);
-  drawSpaced(ctx, '不许坐着', 96, 138, 7);
+  drawSpaced(ctx, '起身', 96, 138, 10);
 
   ctx.fillStyle = 'rgba(255, 255, 255, 0.34)';
   setFont(ctx, 22, 400);
@@ -230,7 +230,7 @@ export function makeProfileCard(store, stats, dateStr) {
 
   ctx.fillStyle = 'rgba(59, 255, 193, 0.92)';
   setFont(ctx, 27, 500);
-  drawSpaced(ctx, '不许坐着', 96, 138, 7);
+  drawSpaced(ctx, '起身', 96, 138, 10);
 
   ctx.fillStyle = 'rgba(255, 255, 255, 0.34)';
   setFont(ctx, 22, 400);
@@ -318,7 +318,7 @@ export async function downloadOrShare(canvas, filename) {
 
     if (filesSupported) {
       try {
-        await navigator.share({ files: [file], title: '不许坐着' });
+        await navigator.share({ files: [file], title: '起身' });
         return 'shared';
       } catch (e) {
         return e && e.name === 'AbortError' ? 'cancelled' : 'share-failed';

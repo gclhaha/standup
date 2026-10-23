@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-<title>不许坐着 · 关不掉的运动闹钟</title>
+<title>起身 · 坐久了，起来动一动</title>
 <meta name="description" content="只有身体真的动起来，这个计时器才会走完。摄像头画面只在本机处理。" />
 <meta name="theme-color" content="#05070a" />
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%2305070a'/%3E%3Ccircle cx='16' cy='9' r='4' fill='none' stroke='%233bffc1' stroke-width='2'/%3E%3Cpath d='M16 14v9M9 19h14M16 23l-5 6M16 23l5 6' stroke='%233bffc1' stroke-width='2.2' stroke-linecap='round'/%3E%3C/svg%3E" />
@@ -19,8 +19,8 @@
     <div class="grain"></div>
     <div class="intro-inner">
       <p class="eyebrow">给每一个坐了太久的人</p>
-      <h1 class="title">不许坐着</h1>
-      <p class="lede">身体不动，闹钟不停。<br />坐满一整天之前，先站起来动 <span id="lede-sec">30</span> 秒。</p>
+      <h1 class="title">起身</h1>
+      <p class="lede">坐久了，起来动一动。<br />接下来 <span id="lede-sec">30</span> 秒，身体必须真的在动。</p>
 
       <div class="picker" role="group" aria-label="选择运动时长">
         <button class="chip active" data-duration="30" type="button">30 秒</button>
@@ -43,8 +43,8 @@
       <div class="reminder-card" id="reminder-card">
         <div class="reminder-top">
           <div class="reminder-heading">
-            <p class="reminder-title">运动闹钟</p>
-            <p class="reminder-sub" id="reminder-sub">每隔一段时间提醒你起身，标签页开着就行</p>
+            <p class="reminder-title">久坐提醒</p>
+            <p class="reminder-sub" id="reminder-sub">按你设的间隔提醒，标签页开着就行</p>
           </div>
           <button class="switch" id="reminder-switch" type="button" role="switch" aria-checked="false" aria-label="开启定时提醒">
             <i></i>
@@ -63,7 +63,6 @@
         <div class="reminder-live" id="reminder-live">
           <span class="pulse"></span>
           <span id="reminder-countdown">下次提醒</span>
-          <button class="linkish" id="reminder-off" type="button">关闭</button>
         </div>
       </div>
     </div>

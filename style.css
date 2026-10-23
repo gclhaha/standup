@@ -79,10 +79,10 @@ html, body {
 }
 
 .title {
-  margin-top: 18px;
-  font-size: clamp(52px, 8.5vw, 92px);
+  margin-top: 20px;
+  font-size: clamp(56px, 9.5vw, 108px);
   font-weight: 500;
-  letter-spacing: 0.03em;
+  letter-spacing: 0.04em;
   line-height: 1;
   color: #f2fffb;
 }
@@ -240,7 +240,7 @@ html, body {
   flex: none;
 }
 
-/* ---------------- 运动闹钟卡片 ---------------- */
+/* ---------------- 久坐提醒卡片 ---------------- */
 
 .reminder-card {
   margin-top: 30px;
