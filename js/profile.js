@@ -103,9 +103,9 @@ export function renderRecent(store, container, limit = 12) {
       const d = new Date(s.t);
       const dateText = s.day === today ? '今天' : s.day.slice(5).replace('-', '/');
       const pct = Math.round((s.i || 0) * 100);
-      return `<li>
+      return `<li data-t="${s.t}" role="button" tabindex="0">
         <span class="when">${dateText} ${pad(d.getHours())}:${pad(d.getMinutes())}<em>强度 ${pct}%</em></span>
-        <span class="what">${(s.d || 0).toFixed(0)} 秒 · ${s.src === 'reminder' ? '提醒触发' : '手动开始'}</span>
+        <span class="what">${(s.d || 0).toFixed(0)} 秒 · ${s.src === 'reminder' ? '提醒触发' : '手动开始'}<i class="chev">›</i></span>
       </li>`;
     })
     .join('');

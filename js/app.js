@@ -4,6 +4,7 @@ import { Sfx } from './audio.js';
 import { makeShareCard, makeProfileCard } from './share.js';
 import { Reminder } from './reminder.js';
 import { Store } from './store.js';
+import { pickSessionTitle } from './lines.js';
 import { renderProfile, exportJSON } from './profile.js';
 
 const $ = (id) => document.getElementById(id);
@@ -80,7 +81,17 @@ const el = {
   reminderSub: $('reminder-sub'),
   reminderToast: $('reminder-toast'),
   reminderGo: $('reminder-go'),
-  reminderSnooze: $('reminder-snooze')
+  reminderSnooze: $('reminder-snooze'),
+
+  recordSheet: $('record-sheet'),
+  sheetBackdrop: $('sheet-backdrop'),
+  sheetTime: $('sheet-time'),
+  sheetSeconds: $('sheet-seconds'),
+  sheetIntensity: $('sheet-intensity'),
+  sheetJumps: $('sheet-jumps'),
+  sheetSource: $('sheet-source'),
+  sheetShare: $('sheet-share'),
+  sheetClose: $('sheet-close')
 };
 
 const store = new Store();
@@ -514,6 +525,7 @@ function finish() {
   store.addSession({
     seconds: moved,
     intensity: avg,
+    jumps,
     src: state.challengeSource
   });
 
@@ -902,7 +914,89 @@ document.addEventListener('pointerdown', (e) => {
 });
 
 document.addEventListener('keydown', (e) => {
-  if (e.key === 'Escape') closeShareMenu();
+  if (e.key !== 'Escape') return;
+  if (!el.shareMenu.hidden) {
+    closeShareMenu();
+    return;
+  }
+  closeRecordSheet();
+});
+
+/* ---------------- 单次记录详情 ---------------- */
+
+let sheetTs = 0;
+
+function fmtSheetTime(ts) {
+  const d = new Date(ts);
+  const p2 = (n) => String(n).padStart(2, '0');
+  const now = new Date();
+  const sameDay = d.toDateString() === now.toDateString();
+  const dateText = sameDay ? '今天' : `${d.getMonth() + 1} 月 ${d.getDate()} 日`;
+  return `${dateText} ${p2(d.getHours())}:${p2(d.getMinutes())}`;
+}
+
+function openRecordSheet(ts) {
+  const found = store.findSession(ts);
+  if (!found) return;
+
+  const s = found.session;
+  sheetTs = ts;
+
+  el.sheetTime.textContent = fmtSheetTime(ts);
+  el.sheetSeconds.textContent = String(Math.round(s.d || 0));
+  el.sheetIntensity.textContent = Math.round((s.i || 0) * 100) + '%';
+  el.sheetJumps.textContent = Store.jumpsOf(s) + ' 个';
+  el.sheetSource.textContent = s.src === 'reminder' ? '提醒触发' : '手动开始';
+
+  el.recordSheet.hidden = false;
+}
+
+function closeRecordSheet() {
+  el.recordSheet.hidden = true;
+}
+
+el.recent.addEventListener('click', (e) => {
+  const li = e.target.closest('li[data-t]');
+  if (!li) return;
+  openRecordSheet(Number(li.dataset.t));
+});
+
+el.recent.addEventListener('keydown', (e) => {
+  if (e.key !== 'Enter' && e.key !== ' ') return;
+  const li = e.target.closest('li[data-t]');
+  if (!li) return;
+  e.preventDefault();
+  openRecordSheet(Number(li.dataset.t));
+});
+
+el.sheetClose.addEventListener('click', closeRecordSheet);
+el.sheetBackdrop.addEventListener('click', closeRecordSheet);
+
+el.sheetShare.addEventListener('click', () => {
+  const found = store.findSession(sheetTs);
+  if (!found) return;
+
+  const s = found.session;
+  const d = new Date(s.t);
+  const p2 = (n) => String(n).padStart(2, '0');
+  const dateStr = `${d.getFullYear()}.${p2(d.getMonth() + 1)}.${p2(d.getDate())}`;
+  const inten = s.i || 0;
+
+  try {
+    menuCard = makeShareCard({
+      seconds: String(Math.round(s.d || 0)),
+      intensity: Math.round(inten * 100) + '%',
+      jumps: String(Store.jumpsOf(s)),
+      title: pickSessionTitle(inten, s.t),
+      dateStr
+    });
+    menuName = `起身-${dateStr.replace(/\./g, '')}.png`;
+  } catch (err) {
+    toast('生成失败');
+    return;
+  }
+
+  openShareMenu(el.sheetShare);
 });
 
 el.btnImport.addEventListener('click', () => el.importFile.click());

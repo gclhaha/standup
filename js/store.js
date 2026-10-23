@@ -111,15 +111,31 @@ export class Store {
    * @param {number} intensity 0..1 平均强度
    * @param {string} src 'reminder' | 'manual'
    */
-  addSession({ seconds, intensity, src = 'manual', at = Date.now() }) {
+  addSession({ seconds, intensity, jumps, src = 'manual', at = Date.now() }) {
     const d = this._day(at);
     d.sessions.push({
       t: at,
       d: Math.round(seconds * 10) / 10,
       i: Math.round(intensity * 100) / 100,
+      j: Math.round(Number(jumps) || 0),
       src
     });
     this.saveLog();
+  }
+
+  /** 按时间戳找一条记录，找不到返回 null */
+  findSession(t) {
+    for (const k of Object.keys(this.log.days)) {
+      const s = (this.log.days[k].sessions || []).find((x) => x.t === t);
+      if (s) return { day: k, session: s };
+    }
+    return null;
+  }
+
+  /** 旧数据没有存开合跳，按同一套公式补算 */
+  static jumpsOf(session) {
+    if (typeof session.j === 'number' && session.j > 0) return session.j;
+    return Math.round((session.d || 0) * (0.35 + (session.i || 0) * 1.15));
   }
 
   /** kind: 'skip' 放弃本次 / 'snooze' 顺延 / 'today' 今天不再提醒 */

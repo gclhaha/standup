@@ -96,3 +96,20 @@ export function pickSessionLine(intensity, date = new Date()) {
 
   return pool[daySeed(date) % pool.length];
 }
+
+const SESSION_TITLES = {
+  high: ['你动了。', '身体醒了。', '这才是起身。'],
+  mid: ['动了，但不够狠。', '勉强算过关。', '及格的一次。'],
+  low: ['算你动了。', '这也能过。', '低空掠过。']
+};
+
+/** 单次成绩卡的主标题，用时间戳做种子，同一次运动每次看都一样 */
+export function pickSessionTitle(intensity, seed = Date.now()) {
+  let pool;
+  if (intensity >= 0.55) pool = SESSION_TITLES.high;
+  else if (intensity >= 0.28) pool = SESSION_TITLES.mid;
+  else pool = SESSION_TITLES.low;
+
+  const n = Math.abs(Math.floor(seed / 1000)) % pool.length;
+  return pool[n];
+}

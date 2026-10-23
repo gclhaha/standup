@@ -225,6 +225,30 @@
     <button class="share-item" data-act="system" id="share-item-system" type="button">系统分享</button>
   </div>
 
+  <!-- 单次记录详情 -->
+  <div class="record-sheet" id="record-sheet" hidden>
+    <div class="sheet-backdrop" id="sheet-backdrop"></div>
+    <div class="sheet-body">
+      <div class="sheet-handle"></div>
+      <p class="sheet-time" id="sheet-time">10月23日 14:25</p>
+
+      <div class="sheet-main">
+        <b id="sheet-seconds">0</b><span>秒 · 有效运动</span>
+      </div>
+
+      <div class="sheet-rows">
+        <div><span>平均强度</span><b id="sheet-intensity">0%</b></div>
+        <div><span>约等于开合跳</span><b id="sheet-jumps">0 个</b></div>
+        <div><span>开始方式</span><b id="sheet-source">手动开始</b></div>
+      </div>
+
+      <div class="sheet-actions">
+        <button class="primary sm" id="sheet-share" type="button"><span>分享这张卡</span></button>
+        <button class="ghost sm" id="sheet-close" type="button"><span>关闭</span></button>
+      </div>
+    </div>
+  </div>
+
 </div>
 
 <script type="module" src="./js/app.js"></script>
