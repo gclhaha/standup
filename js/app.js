@@ -1034,6 +1034,7 @@ el.sheetShare.addEventListener('click', () => {
       intensity: Math.round(inten * 100) + '%',
       jumps: String(Store.jumpsOf(s)),
       title: pickSessionTitle(inten, s.t),
+      seedDate: s.t,
       dateStr
     });
     menuName = `起身-${dateStr.replace(/\./g, '')}.png`;

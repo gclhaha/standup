@@ -26,7 +26,7 @@ function drawSpaced(ctx, text, x, y, spacing) {
   }
 }
 
-export function makeShareCard({ seconds, intensity, jumps, title, dateStr }) {
+export function makeShareCard({ seconds, intensity, jumps, title, dateStr, seedDate }) {
   const canvas = document.createElement('canvas');
   canvas.width = W;
   canvas.height = H;
@@ -121,7 +121,9 @@ export function makeShareCard({ seconds, intensity, jumps, title, dateStr }) {
   // 底部标语
   ctx.fillStyle = 'rgba(255, 255, 255, 0.72)';
   setFont(ctx, 38, 300);
-  const sessionLine = pickSessionLine((parseFloat(intensity) || 0) / 100);
+  // 历史记录用它当天的日期取句，同一条记录每次查看都是同一句
+  const seed = seedDate ? new Date(seedDate) : new Date();
+  const sessionLine = pickSessionLine((parseFloat(intensity) || 0) / 100, seed);
   drawSpaced(ctx, sessionLine, 96, 1200, 2);
 
   ctx.fillStyle = 'rgba(255, 255, 255, 0.30)';

@@ -81,15 +81,15 @@ export function pickStreakLine(streak, date = new Date()) {
   return resolve(pool[daySeed(date) % pool.length], streak);
 }
 
-/** 单次成绩卡：按这次的表现挑 */
+/** 单次成绩卡：按这一次的用力度挑 */
 export function pickSessionLine(intensity, date = new Date()) {
   let pool;
 
   if (intensity >= 0.55) {
     pool = [
-      '这一组，力气用得干净利落',
+      '力气用得干净，收得也利落',
       '动到这个份上，整个人都打开了',
-      '强度够，收得也漂亮'
+      '这一组的分量，身体收下了'
     ];
   } else if (intensity >= 0.28) {
     pool = [
@@ -99,8 +99,8 @@ export function pickSessionLine(intensity, date = new Date()) {
     ];
   } else {
     pool = [
-      '起身这一下，已经比昨天好',
-      '步子不大，方向是对的',
+      '起身这一下，就是好的开始',
+      '步子虽小，方向是对的',
       '每一次起身，都是在照顾自己'
     ];
   }
@@ -109,9 +109,9 @@ export function pickSessionLine(intensity, date = new Date()) {
 }
 
 const SESSION_TITLES = {
-  high: ['动得漂亮。', '起势很足。', '这一组，舒展。'],
-  mid: ['动起来就好。', '恰到好处。', '气息顺了。'],
-  low: ['起身就好。', '慢慢来，也是往前。', '这一下，很好。']
+  high: ['动作到位。', '起势漂亮。', '舒展有力。'],
+  mid: ['动得从容。', '恰到好处。', '气息匀了。'],
+  low: ['稳稳起步。', '轻轻一动。', '慢慢来，也是往前。']
 };
 
 /** 单次成绩卡的主标题，用时间戳做种子，同一次运动每次看都一样 */
