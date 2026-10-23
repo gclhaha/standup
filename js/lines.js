@@ -17,12 +17,12 @@ const POOLS = {
   // 1-2 天
   spark: [
     '开始了，最难的就是这一步',
-    '两天，身体正在记起怎么动',
+    (n) => `${n} 天，身体正在记起怎么动`,
     '开头总是最费劲的，你已经过了'
   ],
   // 3-6 天
   forming: [
-    '第三天，习惯正在形成',
+    (n) => `第 ${n} 天，习惯正在形成`,
     '连续几天，椅子开始不习惯你',
     '这几天不算多，但已经不一样了'
   ],
@@ -34,17 +34,23 @@ const POOLS = {
   ],
   // 30-99 天
   solid: [
-    '一个月，这不是冲动是选择',
-    '三十天，你和身体重新谈了谈',
+    (n) => `${n} 天，这不是冲动是选择`,
+    (n) => `${n} 天，你和身体重新谈了谈`,
     '能坚持到这里的人，其实不多'
   ],
   // 100 天以上
   deep: [
-    '一百天，你比多数人了解身体',
+    (n) => `${n} 天，你比多数人了解身体`,
     '这些数字背后是每天的诚实',
     '很久了，久到它已经不需要提醒'
   ]
 };
+
+// 带数字的句子写成函数，用它真实的连续天数，
+// 否则 45 天的卡片会印上「三十天」这种对不上的话
+function resolve(entry, streak) {
+  return typeof entry === 'function' ? entry(streak) : entry;
+}
 
 function pickBucket(streak) {
   if (streak <= 0) return POOLS.start;
@@ -67,7 +73,7 @@ function daySeed(d) {
 
 export function pickStreakLine(streak, date = new Date()) {
   const pool = pickBucket(streak);
-  return pool[daySeed(date) % pool.length];
+  return resolve(pool[daySeed(date) % pool.length], streak);
 }
 
 /** 单次成绩卡：按这次的表现挑 */
