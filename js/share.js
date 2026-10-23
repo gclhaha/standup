@@ -2,6 +2,8 @@
  * 生成一张竖版成绩卡片，用于保存或直接分享到社交平台。
  */
 
+import { pickStreakLine, pickSessionLine } from './lines.js';
+
 const W = 1080;
 const H = 1440;
 
@@ -119,7 +121,8 @@ export function makeShareCard({ seconds, intensity, jumps, title, dateStr }) {
   // 底部标语
   ctx.fillStyle = 'rgba(255, 255, 255, 0.72)';
   setFont(ctx, 38, 300);
-  drawSpaced(ctx, '身体不动，闹钟不停。', 96, 1200, 3);
+  const sessionLine = pickSessionLine((parseFloat(intensity) || 0) / 100);
+  drawSpaced(ctx, sessionLine, 96, 1200, 2);
 
   ctx.fillStyle = 'rgba(255, 255, 255, 0.30)';
   setFont(ctx, 24, 300);
@@ -284,7 +287,7 @@ export function makeProfileCard(store, stats, dateStr) {
 
   ctx.fillStyle = 'rgba(255, 255, 255, 0.72)';
   setFont(ctx, 38, 300);
-  drawSpaced(ctx, '身体不动，闹钟不停。', 96, 1180, 3);
+  drawSpaced(ctx, pickStreakLine(stats.streak), 96, 1180, 2);
 
   ctx.fillStyle = 'rgba(255, 255, 255, 0.30)';
   setFont(ctx, 24, 300);
