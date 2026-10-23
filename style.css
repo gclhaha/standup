@@ -999,6 +999,39 @@ html, body {
   color: #6d7f7c;
 }
 
+/* 热力图左上角汇总：总和 + 时间跨度 */
+.heatmap-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 14px;
+}
+
+.heatmap-summary {
+  font-size: 11px;
+  font-weight: 400;
+  letter-spacing: 0.06em;
+  color: #7b8d88;
+}
+
+.heatmap-summary b {
+  margin: 0 4px;
+  font-size: 15px;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  color: #eaf3f0;
+  font-variant-numeric: tabular-nums;
+}
+
+.heatmap-range {
+  flex: none;
+  font-size: 10px;
+  letter-spacing: 0.06em;
+  color: #4f5d58;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
 .heatmap-wrap {
   --hm-cell: 15px;
   --hm-gap: 4px;
@@ -1406,10 +1439,10 @@ html, body {
 
 /* ---------------- 热力图悬浮提示 ---------------- */
 
-/* 26 周在容器里只占八成宽，居中更稳 */
+/* 热力图与上方的汇总、下方的图例共用同一条左基线，不做居中 */
 .heatmap,
 .heatmap-months {
-  justify-content: center;
+  justify-content: start;
 }
 
 /* 热力图悬浮提示：由 JS 定位，避免伪元素被相邻格子盖住 */

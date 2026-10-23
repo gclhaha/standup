@@ -65,6 +65,8 @@ const el = {
   pSkips: $('p-skips'),
   heatmap: $('heatmap'),
   heatmapMonths: $('heatmap-months'),
+  heatmapSummary: $('heatmap-summary'),
+  heatmapRange: $('heatmap-range'),
   recent: $('recent'),
   btnShareProfile: $('btn-share-profile'),
   shareMenu: $('share-menu'),
@@ -784,6 +786,8 @@ function openProfile() {
     skips: el.pSkips,
     heatmap: el.heatmap,
     heatmapMonths: el.heatmapMonths,
+    heatmapSummary: el.heatmapSummary,
+    heatmapRange: el.heatmapRange,
     recent: el.recent
   });
   showScreen('profile');

@@ -23,7 +23,7 @@ function level(count) {
   return '';
 }
 
-export function renderHeatmap(store, container, monthsEl, weeks = 26) {
+export function renderHeatmap(store, container, monthsEl, summaryEl, rangeEl, weeks = 26) {
   const today = new Date();
   today.setHours(0, 0, 0, 0);
 
@@ -37,6 +37,7 @@ export function renderHeatmap(store, container, monthsEl, weeks = 26) {
 
   const todayKey = dayKey(today);
   const parts = [];
+  let total = 0;
 
   // 按列填充：每一列是一周，七行对应周日到周六
   for (let w = 0; w < weeks; w++) {
@@ -52,6 +53,7 @@ export function renderHeatmap(store, container, monthsEl, weeks = 26) {
 
       const rec = store.log.days[key];
       const count = rec?.sessions?.length || 0;
+      total += count;
       const isToday = key === todayKey ? 'today' : '';
       const skipCount = rec?.skips?.length || 0;
 
@@ -65,6 +67,22 @@ export function renderHeatmap(store, container, monthsEl, weeks = 26) {
   }
 
   container.innerHTML = parts.join('');
+
+  // 左上角汇总：总和 + 时间跨度，参考 GitHub 的 "289 contributions in the last year"
+  const lastDate = new Date(start);
+  lastDate.setDate(start.getDate() + (weeks - 1) * 7 + 6);
+  const end = lastDate > today ? today : lastDate;
+
+  if (summaryEl) {
+    summaryEl.innerHTML = total > 0
+      ? `过去 ${weeks} 周，共 <b>${total}</b> 次运动`
+      : `过去 ${weeks} 周，还没有运动记录`;
+  }
+
+  if (rangeEl) {
+    rangeEl.textContent =
+      `${start.getMonth() + 1}.${start.getDate()} – ${end.getMonth() + 1}.${end.getDate()}`;
+  }
 
   // 月份刻度：先切出每个月的列区间，跨度不足两列的（如起始那几天的残月）不标
   if (monthsEl) {
@@ -123,7 +141,7 @@ export function renderProfile(store, el) {
   el.total.textContent = fmtDuration(s.totalSec);
   el.skips.textContent = String(s.totalSkips);
 
-  renderHeatmap(store, el.heatmap, el.heatmapMonths);
+  renderHeatmap(store, el.heatmap, el.heatmapMonths, el.heatmapSummary, el.heatmapRange);
   renderRecent(store, el.recent);
 }
 
