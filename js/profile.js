@@ -68,15 +68,18 @@ export function renderHeatmap(store, container, monthsEl, summaryEl, rangeEl, we
 
   container.innerHTML = parts.join('');
 
-  // 左上角汇总：总和 + 时间跨度，参考 GitHub 的 "289 contributions in the last year"
+  // 左上角汇总：总量 + 时间跨度，参考 GitHub 的 "289 contributions in the last year"
   const lastDate = new Date(start);
   lastDate.setDate(start.getDate() + (weeks - 1) * 7 + 6);
   const end = lastDate > today ? today : lastDate;
 
+  // 26 周正好半年，用「近半年」比「过去 26 周」好读；其他周数按实际写
+  const span = weeks === 26 ? '近半年' : `近 ${weeks} 周`;
+
   if (summaryEl) {
     summaryEl.innerHTML = total > 0
-      ? `过去 ${weeks} 周，共 <b>${total}</b> 次运动`
-      : `过去 ${weeks} 周，还没有运动记录`;
+      ? `${span} <b>${total}</b> 次运动`
+      : `${span}还没有运动记录`;
   }
 
   if (rangeEl) {
