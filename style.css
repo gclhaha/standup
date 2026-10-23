@@ -1481,3 +1481,18 @@ html, body {
   color: var(--mint);
   transform: translateX(2px);
 }
+
+/* ---------------- 首屏选择态 ---------------- */
+/* 由 head 里的同步脚本把已保存的值写到 html 上，第一帧就是对的 */
+
+html[data-dur="30"] #duration-picker .chip[data-duration="30"],
+html[data-dur="60"] #duration-picker .chip[data-duration="60"],
+html[data-dur="90"] #duration-picker .chip[data-duration="90"],
+html[data-intv="30"] #reminder-intervals .chip[data-min="30"],
+html[data-intv="60"] #reminder-intervals .chip[data-min="60"],
+html[data-intv="90"] #reminder-intervals .chip[data-min="90"] {
+  color: #04120d;
+  background: var(--mint);
+  border-color: var(--mint);
+  box-shadow: 0 0 30px rgba(59, 255, 193, 0.3);
+}

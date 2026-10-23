@@ -8,6 +8,20 @@
 <meta name="theme-color" content="#05070a" />
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%2305070a'/%3E%3Ccircle cx='16' cy='9' r='4' fill='none' stroke='%233bffc1' stroke-width='2'/%3E%3Cpath d='M16 14v9M9 19h14M16 23l-5 6M16 23l5 6' stroke='%233bffc1' stroke-width='2.2' stroke-linecap='round'/%3E%3C/svg%3E" />
 <link rel="stylesheet" href="./style.css" />
+<script>
+/* 首帧渲染前套用已保存的选择，否则会先显示默认值再跳变 */
+(function () {
+  try {
+    var c = JSON.parse(localStorage.getItem('standup.config.v1') || 'null') || {};
+    var r = document.documentElement;
+    r.dataset.dur = String(c.duration || 30);
+    r.dataset.intv = String(c.interval || 60);
+  } catch (e) {
+    document.documentElement.dataset.dur = '30';
+    document.documentElement.dataset.intv = '60';
+  }
+})();
+</script>
 <script src="./vendor/mediapipe/pose.js"></script>
 </head>
 <body>
@@ -23,7 +37,7 @@
       <p class="lede">坐久了，起来动一动。<br /><span id="lede-sec">30</span> 秒，一组就够。</p>
 
       <div class="picker" id="duration-picker" role="group" aria-label="选择运动时长">
-        <button class="chip active" data-duration="30" type="button">30 秒</button>
+        <button class="chip" data-duration="30" type="button">30 秒</button>
         <button class="chip" data-duration="60" type="button">60 秒</button>
         <button class="chip" data-duration="90" type="button">90 秒</button>
       </div>
@@ -54,7 +68,7 @@
         <div class="reminder-body" id="reminder-body">
           <div class="picker picker-sm" id="reminder-intervals">
             <button class="chip" data-min="30" type="button">30 分钟</button>
-            <button class="chip active" data-min="60" type="button">1 小时</button>
+            <button class="chip" data-min="60" type="button">1 小时</button>
             <button class="chip" data-min="90" type="button">90 分钟</button>
           </div>
           <p class="reminder-note">保持这个标签页打开，建议右键把它固定住。到点会弹系统通知，点通知直接开始挑战。</p>

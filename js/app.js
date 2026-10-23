@@ -590,12 +590,11 @@ function showFatal(title, text) {
 
 el.chips.forEach((chip) => {
   chip.addEventListener('click', () => {
-    el.chips.forEach((c) => c.classList.remove('active'));
-    chip.classList.add('active');
     const val = Number(chip.dataset.duration);
     if (!Number.isFinite(val)) return;
 
     state.duration = val;
+    document.documentElement.dataset.dur = String(val);
     el.ledeSec.textContent = state.duration;
     store.config.duration = state.duration;
     store.saveConfig();
@@ -710,25 +709,21 @@ window.addEventListener('beforeunload', (e) => {
 /* ---------------- 久坐提醒交互 ---------------- */
 
 // 把上次保存的配置回填到界面，避免每次都要重设
-el.chips.forEach((c) => c.classList.toggle('active', Number(c.dataset.duration) === state.duration));
+document.documentElement.dataset.dur = String(state.duration);
 el.ledeSec.textContent = state.duration;
 
 state.reminderInterval = reminder.interval;
-el.reminderIntervals.querySelectorAll('.chip').forEach((c) => {
-  c.classList.toggle('active', Number(c.dataset.min) === reminder.interval);
-});
+document.documentElement.dataset.intv = String(reminder.interval);
 
 el.reminderIntervals.addEventListener('click', (e) => {
   const btn = e.target.closest('.chip');
   if (!btn) return;
 
-  el.reminderIntervals.querySelectorAll('.chip').forEach((c) => c.classList.remove('active'));
-  btn.classList.add('active');
-
   const val = Number(btn.dataset.min);
   if (!Number.isFinite(val)) return;
 
   state.reminderInterval = val;
+  document.documentElement.dataset.intv = String(val);
   // 交给 reminder 处理：会同步写进配置，闹钟开着时还会重算下次提醒
   reminder.setIntervalMinutes(val);
 });
