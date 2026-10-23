@@ -155,8 +155,8 @@ function roundRect(ctx, x, y, w, h, r) {
 }
 
 function drawHeatStrip(ctx, store, centerX, topY) {
-  const CELL = 16;
-  const GAP = 5;
+  const CELL = 24;
+  const GAP = 6;
   const WEEKS = 26;
   const totalW = WEEKS * CELL + (WEEKS - 1) * GAP;
   const x0 = centerX - totalW / 2;
@@ -249,7 +249,7 @@ export function makeProfileCard(store, stats, dateStr) {
   drawSpaced(ctx, '天连续运动', 96, 566, 3);
 
   // 半年热力图
-  drawHeatStrip(ctx, store, W / 2, 648);
+  drawHeatStrip(ctx, store, W / 2, 604);
 
   ctx.strokeStyle = 'rgba(255, 255, 255, 0.10)';
   ctx.lineWidth = 1.5;
