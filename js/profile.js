@@ -53,10 +53,14 @@ export function renderHeatmap(store, container, monthsEl, weeks = 26) {
       const rec = store.log.days[key];
       const count = rec?.sessions?.length || 0;
       const isToday = key === todayKey ? 'today' : '';
-      const skip = rec?.skips?.length ? `，跳过 ${rec.skips.length} 次` : '';
-      const label = `${key}　运动 ${count} 次${skip}`;
+      const skipCount = rec?.skips?.length || 0;
 
-      parts.push(`<i class="${level(count)} ${isToday}" title="${label}"></i>`);
+      const monthDay = `${date.getMonth() + 1} 月 ${date.getDate()} 日`;
+      const body = count > 0 ? `运动 ${count} 次` : '没有运动';
+      const skip = skipCount > 0 ? `，跳过 ${skipCount} 次` : '';
+      const label = `${monthDay} · ${body}${skip}`;
+
+      parts.push(`<i class="${level(count)} ${isToday}" data-label="${label}"></i>`);
     }
   }
 

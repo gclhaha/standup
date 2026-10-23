@@ -54,6 +54,7 @@ const el = {
   fatalText: $('fatal-text'),
   btnRetry: $('btn-retry'),
   toast: $('toast'),
+  heatTip: $('heat-tip'),
 
   fab: $('btn-profile'),
   profile: $('profile'),
@@ -785,6 +786,42 @@ function openProfile() {
 
 el.fab.addEventListener('click', openProfile);
 el.btnProfileClose.addEventListener('click', () => showScreen('intro'));
+
+/* ---------------- 热力图悬浮提示 ---------------- */
+
+el.heatmap.addEventListener('mouseover', (e) => {
+  const cell = e.target.closest('i[data-label]');
+  if (!cell) return;
+
+  const label = cell.dataset.label;
+  if (!label) return;
+
+  const tip = el.heatTip;
+  tip.textContent = label;
+  tip.classList.add('show');
+
+  const r = cell.getBoundingClientRect();
+  const tw = tip.offsetWidth;
+  const th = tip.offsetHeight;
+
+  let left = r.left + r.width / 2 - tw / 2;
+  left = Math.max(8, Math.min(window.innerWidth - tw - 8, left));
+
+  let top = r.top - th - 9;
+  if (top < 8) top = r.bottom + 9;
+
+  tip.style.left = left + 'px';
+  tip.style.top = top + 'px';
+});
+
+el.heatmap.addEventListener('mouseout', (e) => {
+  if (e.relatedTarget && el.heatmap.contains(e.relatedTarget)) return;
+  el.heatTip.classList.remove('show');
+});
+
+window.addEventListener('scroll', () => {
+  el.heatTip.classList.remove('show');
+}, { passive: true });
 
 /* ---------------- 分享菜单 ---------------- */
 

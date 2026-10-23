@@ -912,7 +912,7 @@ html, body {
 .profile-inner {
   position: relative;
   z-index: 2;
-  width: min(680px, calc(100% - 56px));
+  width: min(560px, calc(100% - 56px));
   margin: 0 auto;
 }
 
@@ -1149,7 +1149,7 @@ html, body {
   .nav-pill svg { width: 14px; height: 14px; }
   .profile-inner { width: calc(100% - 40px); }
   .profile-stats { grid-template-columns: repeat(2, 1fr); gap: 18px 10px; }
-  .heatmap-wrap { --hm-cell: 13px; --hm-gap: 3px; }
+  .heatmap-wrap { --hm-cell: 10px; --hm-gap: 2px; }
   .heatmap-months { font-size: 9px; }
 }
 
@@ -1402,4 +1402,47 @@ html, body {
 /* 菜单要浮在抽屉之上 */
 .share-menu {
   z-index: 100;
+}
+
+/* ---------------- 热力图悬浮提示 ---------------- */
+
+/* 26 周在容器里只占八成宽，居中更稳 */
+.heatmap,
+.heatmap-months {
+  justify-content: center;
+}
+
+/* 热力图悬浮提示：由 JS 定位，避免伪元素被相邻格子盖住 */
+.heat-tip {
+  position: fixed;
+  z-index: 120;
+  padding: 6px 10px;
+  border-radius: 7px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: #0d151a;
+  box-shadow: 0 8px 26px rgba(0, 0, 0, 0.7);
+  color: #eaf3f0;
+  font-size: 10.5px;
+  font-weight: 400;
+  letter-spacing: 0.03em;
+  white-space: nowrap;
+  pointer-events: none;
+  opacity: 0;
+  transform: translateY(3px);
+  transition: opacity 0.14s ease, transform 0.14s ease;
+}
+
+.heat-tip.show {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+@media (max-width: 640px) {
+  .heat-tip { display: none; }
+}
+
+/* 月份刻度和格子必须用同一套显式列定义，否则居中后两边算出来不一样 */
+.heatmap,
+.heatmap-months {
+  grid-template-columns: repeat(26, var(--hm-cell));
 }
