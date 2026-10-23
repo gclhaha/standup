@@ -16,7 +16,7 @@ const el = {
   result: $('result'),
 
   ledeSec: $('lede-sec'),
-  chips: Array.from(document.querySelectorAll('.chip')),
+  chips: Array.from(document.querySelectorAll('#duration-picker .chip')),
   btnStart: $('btn-start'),
 
   viewport: $('viewport'),
@@ -592,7 +592,10 @@ el.chips.forEach((chip) => {
   chip.addEventListener('click', () => {
     el.chips.forEach((c) => c.classList.remove('active'));
     chip.classList.add('active');
-    state.duration = Number(chip.dataset.duration);
+    const val = Number(chip.dataset.duration);
+    if (!Number.isFinite(val)) return;
+
+    state.duration = val;
     el.ledeSec.textContent = state.duration;
     store.config.duration = state.duration;
     store.saveConfig();
@@ -718,9 +721,16 @@ el.reminderIntervals.querySelectorAll('.chip').forEach((c) => {
 el.reminderIntervals.addEventListener('click', (e) => {
   const btn = e.target.closest('.chip');
   if (!btn) return;
+
   el.reminderIntervals.querySelectorAll('.chip').forEach((c) => c.classList.remove('active'));
   btn.classList.add('active');
-  state.reminderInterval = Number(btn.dataset.min) || 60;
+
+  const val = Number(btn.dataset.min);
+  if (!Number.isFinite(val)) return;
+
+  state.reminderInterval = val;
+  // 交给 reminder 处理：会同步写进配置，闹钟开着时还会重算下次提醒
+  reminder.setIntervalMinutes(val);
 });
 
 el.reminderSwitch.addEventListener('click', async () => {
