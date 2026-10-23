@@ -1,7 +1,7 @@
 import { Skeleton } from './skeleton.js';
 import { Tracker } from './tracker.js';
 import { Sfx } from './audio.js';
-import { makeShareCard, makeProfileCard, downloadOrShare } from './share.js';
+import { makeShareCard, makeProfileCard } from './share.js';
 import { Reminder } from './reminder.js';
 import { Store } from './store.js';
 import { renderProfile, exportJSON } from './profile.js';
@@ -65,6 +65,8 @@ const el = {
   heatmapMonths: $('heatmap-months'),
   recent: $('recent'),
   btnShareProfile: $('btn-share-profile'),
+  shareMenu: $('share-menu'),
+  shareItemSystem: $('share-item-system'),
   btnImport: $('btn-import-json'),
   importFile: $('import-file'),
   btnExportJson: $('btn-export-json'),
@@ -604,36 +606,23 @@ el.btnHome.addEventListener('click', () => {
   showScreen('intro');
 });
 
-el.btnShare.addEventListener('click', async () => {
-  if (!state.lastResult || state.sharing) return;
+el.btnShare.addEventListener('click', () => {
+  if (!el.shareMenu.hidden) {
+    closeShareMenu();
+    return;
+  }
+  if (!state.lastResult) return;
 
-  state.sharing = true;
-  const btn = el.btnShare;
-  const label = btn.querySelector('span') || btn;
-  const original = label.textContent;
-
-  btn.disabled = true;
-  label.textContent = '正在生成…';
-
-  let text = '已保存';
   try {
-    const canvas = makeShareCard(state.lastResult);
+    menuCard = makeShareCard(state.lastResult);
     const stamp = state.lastResult.dateStr.replace(/\./g, '');
-    const r = await downloadOrShare(canvas, `起身-${stamp}.png`);
-    if (r === 'cancelled') text = '已取消';
-    else if (r === 'share-failed') text = '分享未完成';
-    else if (r === 'failed') text = '生成失败';
+    menuName = `起身-${stamp}.png`;
   } catch (e) {
-    text = '保存失败';
-    console.warn('share failed', e);
+    toast('生成失败');
+    return;
   }
 
-  label.textContent = text;
-  setTimeout(() => {
-    label.textContent = original;
-    btn.disabled = false;
-    state.sharing = false;
-  }, 1500);
+  openShareMenu(el.btnShare);
 });
 
 // 长按退出
@@ -785,37 +774,135 @@ function openProfile() {
 el.fab.addEventListener('click', openProfile);
 el.btnProfileClose.addEventListener('click', () => showScreen('intro'));
 
-el.btnShareProfile.addEventListener('click', async () => {
-  if (state.sharing) return;
+/* ---------------- 分享菜单 ---------------- */
 
-  state.sharing = true;
-  const btn = el.btnShareProfile;
-  const label = btn.querySelector('span') || btn;
-  const original = label.textContent;
-  btn.disabled = true;
-  label.textContent = '正在生成…';
+let menuCard = null;
+let menuName = '';
 
-  let text = '已保存';
+function buildShareCard() {
+  const d = new Date();
+  const p2 = (n) => String(n).padStart(2, '0');
+  const dateStr = `${d.getFullYear()}.${p2(d.getMonth() + 1)}.${p2(d.getDate())}`;
+  menuCard = makeProfileCard(store, store.stats(), dateStr);
+  menuName = `起身-我的记录-${dateStr.replace(/\./g, '')}.png`;
+}
+
+function closeShareMenu() {
+  el.shareMenu.hidden = true;
+}
+
+function openShareMenu(anchorEl) {
+  const btn = anchorEl || el.btnShareProfile;
+  const r = btn.getBoundingClientRect();
+  const menu = el.shareMenu;
+
+  // 没有系统分享能力就不显示那一项
+  const canSystem =
+    typeof navigator.canShare === 'function' && typeof navigator.share === 'function';
+  el.shareItemSystem.hidden = !canSystem;
+
+  menu.hidden = false;
+
+  const mw = menu.offsetWidth || 168;
+  const mh = menu.offsetHeight || 132;
+
+  let left = r.left;
+  if (left + mw > window.innerWidth - 12) left = window.innerWidth - 12 - mw;
+  menu.style.left = Math.max(12, left) + 'px';
+
+  // 优先放在按钮上方，上方空间不够就翻到下方
+  if (r.top - mh - 10 > 12) {
+    menu.style.top = 'auto';
+    menu.style.bottom = window.innerHeight - r.top + 8 + 'px';
+  } else {
+    menu.style.bottom = 'auto';
+    menu.style.top = r.bottom + 8 + 'px';
+  }
+}
+
+async function downloadCanvas(canvas, filename) {
+  const blob = await new Promise((res) => canvas.toBlob(res, 'image/png'));
+  if (!blob) return false;
+
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.download = filename;
+  a.href = url;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 1500);
+  return true;
+}
+
+async function copyCanvas(canvas) {
   try {
-    const d = new Date();
-    const p2 = (n) => String(n).padStart(2, '0');
-    const dateStr = `${d.getFullYear()}.${p2(d.getMonth() + 1)}.${p2(d.getDate())}`;
-    const canvas = makeProfileCard(store, store.stats(), dateStr);
-    const r = await downloadOrShare(canvas, `起身-我的记录-${dateStr.replace(/\./g, '')}.png`);
-    if (r === 'cancelled') text = '已取消';
-    else if (r === 'share-failed') text = '分享未完成';
-    else if (r === 'failed') text = '生成失败';
+    if (!navigator.clipboard || !window.ClipboardItem) return false;
+    const blob = await new Promise((res) => canvas.toBlob(res, 'image/png'));
+    if (!blob) return false;
+    await navigator.clipboard.write([new ClipboardItem({ 'image/png': blob })]);
+    return true;
+  } catch (_) {
+    return false;
+  }
+}
+
+el.btnShareProfile.addEventListener('click', () => {
+  if (!el.shareMenu.hidden) {
+    closeShareMenu();
+    return;
+  }
+  try {
+    buildShareCard();
   } catch (e) {
-    text = '生成失败';
-    console.warn('share profile failed', e);
+    toast('生成失败');
+    return;
+  }
+  openShareMenu(el.btnShareProfile);
+});
+
+el.shareMenu.addEventListener('click', async (e) => {
+  const item = e.target.closest('.share-item');
+  if (!item) return;
+
+  const act = item.dataset.act;
+  closeShareMenu();
+
+  if (!menuCard) return;
+
+  if (act === 'save') {
+    const ok = await downloadCanvas(menuCard, menuName);
+    toast(ok ? '图片已保存' : '保存失败');
+    return;
   }
 
-  label.textContent = text;
-  setTimeout(() => {
-    label.textContent = original;
-    btn.disabled = false;
-    state.sharing = false;
-  }, 1500);
+  if (act === 'copy') {
+    const ok = await copyCanvas(menuCard);
+    toast(ok ? '图片已复制' : '复制失败，试试保存');
+    return;
+  }
+
+  if (act === 'system') {
+    try {
+      const blob = await new Promise((res) => menuCard.toBlob(res, 'image/png'));
+      const file = new File([blob], menuName, { type: 'image/png' });
+      await navigator.share({ files: [file], title: '起身' });
+    } catch (err) {
+      if (!err || err.name !== 'AbortError') toast('分享未完成');
+    }
+  }
+});
+
+// 点空白处或按 ESC 关掉菜单
+document.addEventListener('pointerdown', (e) => {
+  if (el.shareMenu.hidden) return;
+  if (el.shareMenu.contains(e.target)) return;
+  if (el.btnShareProfile.contains(e.target)) return;
+  closeShareMenu();
+});
+
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape') closeShareMenu();
 });
 
 el.btnImport.addEventListener('click', () => el.importFile.click());
