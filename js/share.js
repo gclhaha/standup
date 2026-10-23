@@ -66,7 +66,7 @@ export function makeShareCard({ seconds, intensity, jumps, title, dateStr }) {
 
   ctx.fillStyle = 'rgba(255, 255, 255, 0.34)';
   setFont(ctx, 22, 400);
-  drawSpaced(ctx, 'STAND UP · 1024', 96, 180, 4);
+  drawSpaced(ctx, 'STAND UP · 单次', 96, 180, 4);
 
   // 大数字
   ctx.fillStyle = '#f4fffb';
