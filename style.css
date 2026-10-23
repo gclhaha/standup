@@ -8,6 +8,30 @@
   --mint-dim: #1d8f6d;
   --alarm: #ff4257;
   --amber: #ffc45e;
+
+  /* ---- 版式基准 ----
+     所有页面共用同一列宽、同一套字号、同一条上边距，
+     否则会像两个不同产品拼在一起                        */
+  --w: 560px;          /* 内容列宽 */
+  --pad: 56px;         /* 页面上边距 */
+  --bar: 36px;         /* 顶部导航条高度（返回 / 我的记录所在那一行） */
+  --gap-bar: 14px;     /* 导航条与标题区的间距 */
+
+  --fs-display: clamp(54px, 8.4vw, 96px);
+  --fs-h1: clamp(26px, 3.6vw, 36px);
+  --fs-num: clamp(24px, 3vw, 30px);
+  --fs-lead: clamp(14px, 1.4vw, 15px);
+  --fs-body: 13px;
+  --fs-label: 11px;
+  --fs-micro: 10px;
+
+  --lh-body: 1.8;
+
+  --c-hi: #f2fffb;
+  --c-text: #9fb2ae;
+  --c-mute: #7b8d88;
+  --c-faint: #55645f;
+  --rule: rgba(255, 255, 255, 0.07);
 }
 
 html, body {
@@ -63,38 +87,40 @@ html, body {
 .intro-inner {
   position: relative;
   z-index: 2;
-  width: min(680px, calc(100% - 56px));
-  margin: auto;
-  padding: 44px 0;
+  width: min(var(--w), calc(100% - 40px));
+  /* 顶部留出一条导航条的高度，让标题和「我的记录」页从同一高度开始 */
+  padding: calc(var(--pad) + var(--bar) + var(--gap-bar)) 0 64px;
+  margin: 0 auto;
   text-align: left;
 }
 
 .eyebrow {
-  font-size: 11px;
+  font-size: var(--fs-label);
   font-weight: 400;
-  letter-spacing: 0.2em;
+  line-height: 1.45;
+  letter-spacing: 0.18em;
   color: var(--mint);
   text-transform: uppercase;
   opacity: 0.85;
 }
 
 .title {
-  margin-top: 20px;
+  margin-top: 18px;
   /* 大字号汉字的字形自带左边距，放大后视觉上会偏右，拉回来对齐正文 */
   margin-left: -0.03em;
-  font-size: clamp(56px, 9.5vw, 108px);
+  font-size: var(--fs-display);
   font-weight: 500;
   letter-spacing: 0.04em;
   line-height: 1;
-  color: #f2fffb;
+  color: var(--c-hi);
 }
 
 .lede {
-  margin-top: 26px;
-  font-size: clamp(14px, 1.5vw, 16px);
+  margin-top: 20px;
+  font-size: var(--fs-lead);
   font-weight: 400;
-  line-height: 1.85;
-  color: #9fb2ae;
+  line-height: var(--lh-body);
+  color: var(--c-text);
   letter-spacing: 0.02em;
 }
 
@@ -103,16 +129,17 @@ html, body {
 .picker {
   display: flex;
   gap: 8px;
-  margin-top: 34px;
+  margin-top: 32px;
 }
 
 .chip {
   font-family: inherit;
   font-size: 12.5px;
   font-weight: 400;
-  letter-spacing: 0.08em;
+  letter-spacing: 0.06em;
   color: var(--dim);
-  padding: 9px 20px;
+  height: 36px;
+  padding: 0 20px;
   border-radius: 999px;
   border: 1px solid rgba(255, 255, 255, 0.09);
   background: transparent;
@@ -134,14 +161,15 @@ html, body {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  margin-top: 30px;
-  padding: 16px 40px;
+  height: 52px;
+  padding: 0 34px;
   border: none;
   border-radius: 999px;
   font-family: inherit;
   font-size: 14px;
   font-weight: 500;
-  letter-spacing: 0.12em;
+  letter-spacing: 0.1em;
+  white-space: nowrap;
   color: #04120d;
   background: var(--mint);
   cursor: pointer;
@@ -149,6 +177,9 @@ html, body {
   transition: transform 0.2s, box-shadow 0.28s, filter 0.2s;
   box-shadow: 0 0 0 rgba(59, 255, 193, 0);
 }
+
+/* 按钮不带外边距，间距由所在容器决定，避免各页各写一套 */
+.intro-inner > .primary { margin-top: 32px; }
 
 .primary:hover {
   transform: translateY(-1px);
@@ -173,28 +204,27 @@ html, body {
 }
 
 .result-actions {
-  margin-top: 4px;
+  margin-top: 32px;
   display: flex;
   flex-wrap: wrap;
   align-items: center;
   gap: 10px;
 }
 
-.result-actions .primary { margin-top: 26px; }
-.result-actions .ghost { margin-top: 26px; }
-
 .ghost {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  padding: 14px 30px;
+  height: 52px;
+  padding: 0 26px;
   border-radius: 999px;
   border: 1px solid rgba(255, 255, 255, 0.1);
   background: transparent;
-  color: #9fb2ae;
+  color: var(--c-text);
   font-family: inherit;
-  font-size: 13px;
-  letter-spacing: 0.1em;
+  font-size: var(--fs-body);
+  letter-spacing: 0.08em;
+  white-space: nowrap;
   cursor: pointer;
   transition: all 0.22s;
 }
@@ -209,45 +239,48 @@ html, body {
 }
 
 .privacy {
-  margin-top: 20px;
-  font-size: 11.5px;
+  margin-top: 18px;
+  font-size: var(--fs-label);
   font-weight: 400;
-  letter-spacing: 0.06em;
-  color: #55645f;
+  line-height: 1.6;
+  letter-spacing: 0.04em;
+  color: var(--c-faint);
 }
 
 .how {
-  margin-top: 52px;
+  margin-top: 44px;
   display: grid;
-  gap: 13px;
-  border-top: 1px solid rgba(255, 255, 255, 0.06);
-  padding-top: 24px;
+  gap: 12px;
+  border-top: 1px solid var(--rule);
+  padding-top: 22px;
 }
 
 .how-item {
   display: flex;
-  gap: 16px;
+  gap: 14px;
   align-items: baseline;
-  font-size: 12.5px;
+  font-size: var(--fs-body);
   font-weight: 400;
-  letter-spacing: 0.04em;
-  color: #7b8d88;
+  line-height: 1.6;
+  letter-spacing: 0.02em;
+  color: var(--c-mute);
 }
 
 .how-item b {
-  font-size: 10.5px;
+  font-size: var(--fs-micro);
   font-weight: 500;
   letter-spacing: 0.1em;
   color: var(--mint-dim);
+  font-variant-numeric: tabular-nums;
   flex: none;
 }
 
 /* ---------------- 久坐提醒卡片 ---------------- */
 
 .reminder-card {
-  margin-top: 30px;
+  margin-top: 32px;
   padding: 18px 20px 16px;
-  border: 1px solid rgba(255, 255, 255, 0.07);
+  border: 1px solid var(--rule);
   border-radius: 16px;
   background: rgba(255, 255, 255, 0.022);
   transition: border-color 0.3s, background 0.3s;
@@ -266,18 +299,18 @@ html, body {
 }
 
 .reminder-title {
-  font-size: 13.5px;
+  font-size: var(--fs-body);
   font-weight: 400;
-  letter-spacing: 0.1em;
+  letter-spacing: 0.08em;
   color: #dfefea;
 }
 
 .reminder-sub {
   margin-top: 6px;
-  font-size: 11.5px;
+  font-size: var(--fs-label);
   font-weight: 400;
-  line-height: 1.6;
-  letter-spacing: 0.03em;
+  line-height: 1.65;
+  letter-spacing: 0.02em;
   color: #6a7c77;
 }
 
@@ -331,18 +364,23 @@ html, body {
   margin-top: 0;
 }
 
+.picker-sm {
+  margin-top: 0;
+}
+
 .picker-sm .chip {
-  padding: 7px 14px;
-  font-size: 11.5px;
+  height: 30px;
+  padding: 0 14px;
+  font-size: 12px;
 }
 
 .reminder-note {
   margin-top: 12px;
-  font-size: 11px;
+  font-size: var(--fs-label);
   font-weight: 400;
   line-height: 1.7;
   letter-spacing: 0.02em;
-  color: #56655f;
+  color: var(--c-faint);
 }
 
 .reminder-live {
@@ -353,6 +391,7 @@ html, body {
   font-size: 12px;
   letter-spacing: 0.04em;
   color: #9fd8c7;
+  font-variant-numeric: tabular-nums;
 }
 
 .reminder-card.on .reminder-live {
@@ -425,7 +464,7 @@ html, body {
 
 .reminder-toast-sub {
   margin-top: 8px;
-  font-size: 12.5px;
+  font-size: var(--fs-body);
   font-weight: 400;
   line-height: 1.7;
   color: #8fa39d;
@@ -440,8 +479,10 @@ html, body {
 .primary.sm,
 .ghost.sm {
   margin-top: 0;
-  padding: 11px 22px;
-  font-size: 12px;
+  height: 40px;
+  padding: 0 18px;
+  font-size: 12.5px;
+  letter-spacing: 0.06em;
   width: auto;
   flex: none;
 }
@@ -752,40 +793,41 @@ html, body {
 .result-inner {
   position: relative;
   z-index: 2;
-  width: min(680px, calc(100% - 56px));
-  margin: auto;
-  padding: 44px 0;
+  width: min(var(--w), calc(100% - 40px));
+  margin: 0 auto;
+  padding: calc(var(--pad) + var(--bar) + var(--gap-bar)) 0 64px;
 }
 
 .result-title {
-  margin-top: 16px;
-  font-size: clamp(40px, 6vw, 68px);
+  margin-top: 14px;
+  font-size: var(--fs-h1);
   font-weight: 400;
+  line-height: 1.25;
   letter-spacing: 0.02em;
-  color: #f2fffb;
+  color: var(--c-hi);
 }
 
 .result-sub {
-  margin-top: 18px;
-  font-size: 14px;
+  margin-top: 14px;
+  font-size: var(--fs-lead);
   font-weight: 400;
-  line-height: 1.8;
-  color: #9fb2ae;
+  line-height: var(--lh-body);
+  color: var(--c-text);
 }
 
 .stats {
   display: flex;
-  gap: clamp(20px, 5vw, 54px);
-  margin-top: 46px;
-  padding: 28px 0;
-  border-top: 1px solid rgba(255, 255, 255, 0.07);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+  gap: clamp(20px, 5vw, 48px);
+  margin-top: 36px;
+  padding: 24px 0;
+  border-top: 1px solid var(--rule);
+  border-bottom: 1px solid var(--rule);
 }
 
 .stat { display: flex; flex-direction: column; gap: 10px; }
 
 .stat b {
-  font-size: clamp(30px, 4.4vw, 46px);
+  font-size: var(--fs-num);
   font-weight: 300;
   line-height: 1;
   color: var(--mint);
@@ -793,9 +835,9 @@ html, body {
 }
 
 .stat span {
-  font-size: 10.5px;
-  letter-spacing: 0.1em;
-  color: #7b8d88;
+  font-size: var(--fs-label);
+  letter-spacing: 0.06em;
+  color: var(--c-mute);
 }
 
 /* ---------------- 致命错误 ---------------- */
@@ -825,7 +867,11 @@ html, body {
   font-size: 20px;
   font-weight: 400;
   letter-spacing: 0.04em;
-  color: #f2fffb;
+  color: var(--c-hi);
+}
+
+.fatal-box .primary {
+  margin-top: 22px;
 }
 
 .fatal-box p {
@@ -839,17 +885,20 @@ html, body {
 /* ---------------- 移动端 ---------------- */
 
 @media (max-width: 640px) {
-  .intro-inner, .result-inner { width: calc(100% - 44px); }
+  :root {
+    --pad: 26px;
+    --bar: 34px;
+    --gap-bar: 12px;
+    --fs-h1: 26px;
+  }
   .title { margin-top: 14px; }
-  .lede { margin-top: 20px; font-size: 13px; }
-  .picker { margin-top: 26px; }
-  .primary { width: 100%; margin-top: 24px; }
+  .lede { margin-top: 16px; }
+  .picker { margin-top: 24px; }
+  .intro-inner > .primary { width: 100%; margin-top: 26px; }
   .how { margin-top: 34px; gap: 11px; }
-  .how-item { font-size: 11.5px; }
   .hud-top { flex-direction: column; gap: 14px; }
   .meter { width: 100%; }
   .stats { gap: 18px; flex-wrap: wrap; }
-  .stat b { font-size: 26px; }
   .quit { bottom: auto; top: 50%; right: 12px; transform: translateY(-50%); }
 }
 
@@ -861,9 +910,9 @@ html, body {
 
 .nav-pill {
   position: fixed;
-  top: 43px;
-  /* 和内容列右边缘对齐：桌面留白随视口增大，窄屏退到 20px 安全边距 */
-  right: max(20px, calc((100% - 680px) / 2));
+  /* 与内容列的顶部导航条同高，右边与内容列右边缘对齐 */
+  top: calc(var(--pad) - 1px);
+  right: max(20px, calc((100% - var(--w)) / 2));
   z-index: 30;
   display: inline-flex;
   align-items: center;
@@ -906,32 +955,36 @@ html, body {
   display: block;
   overflow-y: auto;
   overflow-x: hidden;
-  padding: clamp(30px, 6vh, 62px) 0 clamp(44px, 9vh, 80px);
+  padding: var(--pad) 0 72px;
 }
 
 .profile-inner {
   position: relative;
   z-index: 2;
-  width: min(560px, calc(100% - 56px));
+  width: min(var(--w), calc(100% - 40px));
   margin: 0 auto;
 }
 
 .profile-topbar {
-  margin-bottom: 22px;
+  display: flex;
+  align-items: center;
+  height: var(--bar);
+  margin-bottom: var(--gap-bar);
 }
 
 .back-btn {
   display: inline-flex;
   align-items: center;
   gap: 3px;
-  margin-left: -11px;
-  padding: 8px 14px 8px 11px;
+  height: 32px;
+  margin-left: -10px;
+  padding: 0 14px 0 10px;
   border: none;
   border-radius: 999px;
   background: none;
   color: var(--mint);
   font-family: inherit;
-  font-size: 13.5px;
+  font-size: var(--fs-body);
   font-weight: 400;
   letter-spacing: 0.04em;
   cursor: pointer;
@@ -953,10 +1006,11 @@ html, body {
 
 .profile-title {
   margin-top: 12px;
-  font-size: clamp(28px, 4vw, 38px);
+  font-size: var(--fs-h1);
   font-weight: 400;
-  letter-spacing: 0.04em;
-  color: #f2fffb;
+  line-height: 1.25;
+  letter-spacing: 0.02em;
+  color: var(--c-hi);
 }
 
 .profile-stats {
@@ -965,8 +1019,8 @@ html, body {
   gap: 10px;
   margin-top: 34px;
   padding: 24px 0;
-  border-top: 1px solid rgba(255, 255, 255, 0.07);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+  border-top: 1px solid var(--rule);
+  border-bottom: 1px solid var(--rule);
 }
 
 .pstat {
@@ -976,7 +1030,7 @@ html, body {
 }
 
 .pstat b {
-  font-size: clamp(23px, 3.2vw, 33px);
+  font-size: var(--fs-num);
   font-weight: 300;
   line-height: 1;
   color: var(--mint);
@@ -984,9 +1038,9 @@ html, body {
 }
 
 .pstat span {
-  font-size: 10.5px;
+  font-size: var(--fs-label);
   letter-spacing: 0.06em;
-  color: #7b8d88;
+  color: var(--c-mute);
 }
 
 .section-block {
@@ -994,7 +1048,7 @@ html, body {
 }
 
 .section-title {
-  font-size: 10.5px;
+  font-size: var(--fs-label);
   letter-spacing: 0.12em;
   color: #6d7f7c;
 }
@@ -1008,33 +1062,33 @@ html, body {
 }
 
 .heatmap-summary {
-  font-size: 11px;
+  font-size: var(--fs-label);
   font-weight: 400;
-  letter-spacing: 0.06em;
-  color: #7b8d88;
+  letter-spacing: 0.04em;
+  color: var(--c-mute);
 }
 
 .heatmap-summary b {
   margin: 0 4px;
-  font-size: 15px;
+  font-size: 14px;
   font-weight: 500;
   letter-spacing: 0.02em;
-  color: #eaf3f0;
+  color: var(--ink);
   font-variant-numeric: tabular-nums;
 }
 
 .heatmap-range {
   flex: none;
-  font-size: 10px;
+  font-size: var(--fs-micro);
   letter-spacing: 0.06em;
-  color: #4f5d58;
+  color: var(--c-faint);
   font-variant-numeric: tabular-nums;
   white-space: nowrap;
 }
 
 .heatmap-wrap {
-  --hm-cell: 15px;
-  --hm-gap: 4px;
+  --hm-cell: 16px;
+  --hm-gap: 5px;
   margin-top: 16px;
 }
 
@@ -1045,9 +1099,9 @@ html, body {
   gap: var(--hm-gap);
   height: 14px;
   margin-bottom: 7px;
-  font-size: 9.5px;
+  font-size: var(--fs-micro);
   letter-spacing: 0.03em;
-  color: #4f5d58;
+  color: var(--c-faint);
 }
 
 .heatmap-months span {
@@ -1096,9 +1150,9 @@ html, body {
   align-items: center;
   gap: 5px;
   margin-top: 12px;
-  font-size: 10px;
-  letter-spacing: 0.1em;
-  color: #56655f;
+  font-size: var(--fs-micro);
+  letter-spacing: 0.08em;
+  color: var(--c-faint);
 }
 
 .heatmap-legend i {
@@ -1124,7 +1178,7 @@ html, body {
   gap: 14px;
   padding: 12px 0;
   border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-  font-size: 12.5px;
+  font-size: var(--fs-body);
   color: #8fa39d;
 }
 
@@ -1135,21 +1189,21 @@ html, body {
 
 .recent li .when em {
   font-style: normal;
-  font-size: 11px;
+  font-size: var(--fs-label);
   color: #5f716c;
   margin-left: 10px;
 }
 
 .recent li .what {
   color: #5f716c;
-  font-size: 11.5px;
-  letter-spacing: 0.04em;
+  font-size: var(--fs-label);
+  letter-spacing: 0.03em;
 }
 
 .recent li.empty {
   display: block;
-  color: #4f5d58;
-  font-size: 12px;
+  color: var(--c-faint);
+  font-size: var(--fs-body);
   padding: 22px 0;
   border-bottom: none;
 }
@@ -1174,16 +1228,33 @@ html, body {
 
 @media (max-width: 640px) {
   .nav-pill {
-    top: 20px;
-    padding: 7px 13px 7px 11px;
-    font-size: 11px;
+    padding: 8px 13px 8px 11px;
+    font-size: 11.5px;
     gap: 6px;
   }
   .nav-pill svg { width: 14px; height: 14px; }
-  .profile-inner { width: calc(100% - 40px); }
   .profile-stats { grid-template-columns: repeat(2, 1fr); gap: 18px 10px; }
-  .heatmap-wrap { --hm-cell: 10px; --hm-gap: 2px; }
+  .heatmap-wrap { --hm-cell: 11px; --hm-gap: 2px; }
   .heatmap-months { font-size: 9px; }
+
+  /* 动作区在窄屏上统一成网格：主操作占满一行，次操作均分 */
+  .result-actions,
+  .profile-actions {
+    display: grid;
+    gap: 9px;
+  }
+  .result-actions { grid-template-columns: 1fr 1fr; }
+  .profile-actions { grid-template-columns: repeat(3, 1fr); }
+  .result-actions .primary,
+  .profile-actions .primary {
+    grid-column: 1 / -1;
+    width: 100%;
+  }
+  .result-actions .ghost,
+  .profile-actions .ghost {
+    width: 100%;
+    padding: 0 10px;
+  }
 }
 
 /* ---------------- 分享菜单 ---------------- */
@@ -1216,15 +1287,15 @@ html, body {
 }
 
 .share-item {
-  padding: 11px 14px;
+  padding: 10px 14px;
   border: none;
   border-radius: 9px;
   background: none;
   color: #dfefea;
   font-family: inherit;
-  font-size: 12.5px;
+  font-size: var(--fs-body);
   font-weight: 400;
-  letter-spacing: 0.04em;
+  letter-spacing: 0.03em;
   text-align: left;
   cursor: pointer;
   transition: background 0.15s, color 0.15s;
@@ -1366,7 +1437,7 @@ html, body {
 }
 
 .sheet-time {
-  font-size: 11.5px;
+  font-size: var(--fs-label);
   letter-spacing: 0.1em;
   color: #6a7c77;
   text-align: center;
@@ -1389,7 +1460,7 @@ html, body {
 }
 
 .sheet-main span {
-  font-size: 12px;
+  font-size: var(--fs-label);
   letter-spacing: 0.08em;
   color: #6a7c77;
 }
@@ -1408,13 +1479,13 @@ html, body {
 }
 
 .sheet-rows span {
-  font-size: 12px;
+  font-size: var(--fs-label);
   color: #6a7c77;
   letter-spacing: 0.04em;
 }
 
 .sheet-rows b {
-  font-size: 13.5px;
+  font-size: var(--fs-body);
   font-weight: 400;
   color: #dfefea;
   font-variant-numeric: tabular-nums;
