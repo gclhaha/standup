@@ -1446,3 +1446,38 @@ html, body {
 .heatmap-months {
   grid-template-columns: repeat(26, var(--hm-cell));
 }
+
+/* ---------------- 记录列表：悬浮态重做 ---------------- */
+
+.recent {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.recent li:not(.empty) {
+  padding: 11px 14px;
+  margin: 0 -14px;
+  border-bottom: none;
+  border-radius: 10px;
+  transition: background 0.16s ease, box-shadow 0.16s ease;
+}
+
+.recent li[data-t]:hover {
+  background: rgba(255, 255, 255, 0.055);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.045);
+}
+
+.recent li[data-t]:active {
+  background: rgba(59, 255, 193, 0.1);
+  box-shadow: inset 0 0 0 1px rgba(59, 255, 193, 0.22);
+}
+
+.recent li .chev {
+  transition: color 0.16s ease, transform 0.16s ease;
+}
+
+.recent li[data-t]:hover .chev {
+  color: var(--mint);
+  transform: translateX(2px);
+}
