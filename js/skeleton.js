@@ -49,6 +49,8 @@ export class Skeleton {
     this.lastT = 0;
     this.lastRipple = 0;
     this.energy = 0;
+    this.poseHue = 160;
+    this.poseSwing = 158;
   }
 
   resize(cssW, cssH, dpr) {
@@ -67,6 +69,17 @@ export class Skeleton {
       this.videoW = w;
       this.videoH = h;
     }
+  }
+
+  /** 主题色相：静止时的基准色 + 强度拉满时的偏移量 */
+  setPose(hue, swing) {
+    this.poseHue = Number.isFinite(hue) ? hue : 160;
+    this.poseSwing = Number.isFinite(swing) ? swing : 158;
+  }
+
+  hueOf(intensity) {
+    const i = Math.min(1, Math.max(0, intensity || 0));
+    return ((this.poseHue - i * this.poseSwing) % 360 + 360) % 360;
   }
 
   /** 切换绘制风格：neon 霓虹形体 / line 纯线稿 */
@@ -117,7 +130,7 @@ export class Skeleton {
     this.clear();
     this.updateEffects(dt);
 
-    const hue = 160 - Math.min(1, Math.max(0, intensity)) * 158;
+    const hue = this.hueOf(intensity);
     const unit = Math.max(1.7, Math.min(this.w, this.h) * 0.0038);
 
     if (!landmarks) {
@@ -352,7 +365,7 @@ export class Skeleton {
     for (let i = 0; i < n - 1; i++) {
       const f = this.trail[i];
       const age = (i + 1) / n;               // 越新越亮
-      const hue = 160 - Math.min(1, Math.max(0, f.intensity)) * 158;
+      const hue = this.hueOf(f.intensity);
       ctx.strokeStyle = `hsla(${hue}, 100%, 66%, ${(age * 0.16).toFixed(3)})`;
       ctx.lineWidth = unit * (0.6 + age * 2.2);
       this.strokeBones(f.pts, null);
@@ -460,7 +473,7 @@ export class Skeleton {
     const ctx = this.ctx;
     const pts = landmarks.map((lm) => this.project(lm));
 
-    const hue = 160 - Math.min(1, Math.max(0, intensity)) * 158;
+    const hue = this.hueOf(intensity);
     const base = `hsl(${hue}, 100%, 62%)`;
     const glow = `hsla(${hue}, 100%, 55%, 0.22)`;
     const core = `hsla(${hue}, 100%, 86%, 1)`;

@@ -32,7 +32,8 @@ export class Store {
       interval: 60,
       reminderOn: false,
       nextAt: 0,
-      display: 'stage'
+      display: 'stage',
+      theme: 'mint'
     };
     this.log = { v: 1, days: {} };
     this._timer = null;
@@ -50,6 +51,7 @@ export class Store {
         if (typeof c.reminderOn === 'boolean') this.config.reminderOn = c.reminderOn;
         if (typeof c.nextAt === 'number') this.config.nextAt = c.nextAt;
         if (c.display === 'stage' || c.display === 'real') this.config.display = c.display;
+        if (typeof c.theme === 'string') this.config.theme = c.theme;
       }
     } catch (_) {}
 
