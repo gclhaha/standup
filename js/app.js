@@ -22,7 +22,6 @@ const el = {
   viewport: $('viewport'),
   videoBg: $('video-bg'),
   viewPicker: $('view-picker'),
-  themePicker: $('theme-picker'),
   video: $('video'),
   overlay: $('overlay'),
 
@@ -773,32 +772,19 @@ applyView(urlView || store.config.display || 'stage');
 
 const THEMES = ['mint', 'coral', 'indigo', 'paper'];
 
+// 界面上不提供切换，默认薄荷。?theme= 只用于内部对比四套配色
 function applyTheme(name) {
   const t = THEMES.includes(name) ? name : 'mint';
   document.documentElement.dataset.theme = t;
 
-  el.themePicker.querySelectorAll('.swatch').forEach((sw) => {
-    sw.classList.toggle('on', sw.dataset.theme === t);
-  });
-
-  // 骨架配色跟着主题走
   const cs = getComputedStyle(document.documentElement);
-  const hue = parseFloat(cs.getPropertyValue('--pose-hue'));
-  const swing = parseFloat(cs.getPropertyValue('--pose-swing'));
-  skeleton.setPose(hue, swing);
-
-  store.config.theme = t;
-  store.saveConfig();
+  skeleton.setPose(
+    parseFloat(cs.getPropertyValue('--pose-hue')),
+    parseFloat(cs.getPropertyValue('--pose-swing'))
+  );
 }
 
-el.themePicker.addEventListener('click', (e) => {
-  const btn = e.target.closest('.swatch');
-  if (!btn) return;
-  applyTheme(btn.dataset.theme);
-});
-
-const urlTheme = new URLSearchParams(location.search).get('theme');
-applyTheme(urlTheme || store.config.theme || 'mint');
+applyTheme(new URLSearchParams(location.search).get('theme'));
 
 el.reminderIntervals.addEventListener('click', (e) => {
   const btn = e.target.closest('.chip');

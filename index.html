@@ -17,12 +17,10 @@
     r.dataset.dur = String(c.duration || 30);
     r.dataset.intv = String(c.interval || 60);
     r.dataset.view = c.display === 'real' ? 'real' : 'stage';
-    r.dataset.theme = c.theme || 'mint';
   } catch (e) {
     document.documentElement.dataset.dur = '30';
     document.documentElement.dataset.intv = '60';
     document.documentElement.dataset.view = 'stage';
-    document.documentElement.dataset.theme = 'mint';
   }
 })();
 </script>
@@ -52,13 +50,6 @@
         <button class="chip" data-view="real" type="button">真人</button>
       </div>
 
-      <p class="picker-caption">主题</p>
-      <div class="picker theme-picker" id="theme-picker" role="group" aria-label="选择主题">
-        <button class="swatch" data-theme="mint" type="button" aria-label="薄荷" title="薄荷"></button>
-        <button class="swatch" data-theme="coral" type="button" aria-label="珊瑚" title="珊瑚"></button>
-        <button class="swatch" data-theme="indigo" type="button" aria-label="靛蓝" title="靛蓝"></button>
-        <button class="swatch" data-theme="paper" type="button" aria-label="纸白" title="纸白"></button>
-      </div>
 
       <button class="primary" id="btn-start" type="button">
         <span>打开摄像头 · 开始</span>
