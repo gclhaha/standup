@@ -21,7 +21,6 @@ const el = {
 
   viewport: $('viewport'),
   video: $('video'),
-  videoBg: $('video-bg'),
   overlay: $('overlay'),
 
   timer: $('timer'),
@@ -273,12 +272,16 @@ async function openCamera() {
 
   state.stream = stream;
   el.video.srcObject = stream;
-  el.videoBg.srcObject = stream;
 
   await el.video.play().catch(() => {});
-  await el.videoBg.play().catch(() => {});
 
   skeleton.setVideoSize(el.video.videoWidth, el.video.videoHeight);
+
+  // 取景框按实际摄像头比例来，画面不显示，但要让用户知道拍到哪儿了
+  if (el.video.videoWidth && el.video.videoHeight) {
+    const ar = el.video.videoWidth / el.video.videoHeight;
+    el.stage.style.setProperty('--frame-ar', ar.toFixed(4));
+  }
   resizeCanvas();
 }
 
@@ -288,7 +291,6 @@ function stopCamera() {
     state.stream = null;
   }
   el.video.srcObject = null;
-  el.videoBg.srcObject = null;
 }
 
 /* ---------------- 画布尺寸 ---------------- */

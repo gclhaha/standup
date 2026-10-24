@@ -46,7 +46,7 @@
         <span>打开摄像头 · 开始</span>
       </button>
 
-      <p class="privacy">画面只在本机实时处理、不录制；<br />运动记录也存在浏览器本地，都不上传云端。</p>
+      <p class="privacy">摄像头只用来识别动作，画面不显示、不录制；<br />运动记录存在浏览器本地，都不上传云端。</p>
 
       <div class="how">
         <div class="how-item"><b>01</b><span>站到镜头前，让全身进入画面</span></div>
@@ -96,8 +96,20 @@
   <!-- ========== 挑战页 ========== -->
   <section class="screen" id="stage">
     <div class="viewport" id="viewport">
-      <video class="video-bg" id="video-bg" playsinline muted></video>
-      <video class="video-fg" id="video" playsinline muted></video>
+      <!-- 舞台背景：程序化生成的夜景，不涉及任何摄像头画面 -->
+      <div class="scene" aria-hidden="true">
+        <div class="scene-stars"></div>
+        <div class="scene-glow"></div>
+        <div class="scene-orb"></div>
+        <div class="scene-floor"></div>
+        <div class="scene-fade"></div>
+        <div class="scene-horizon"></div>
+        <div class="scene-frame"></div>
+      </div>
+
+      <!-- 摄像头只用于识别，不作为画面显示 -->
+      <video class="video-src" id="video" playsinline muted></video>
+
       <canvas id="overlay"></canvas>
       <div class="vignette"></div>
       <div class="scanline"></div>

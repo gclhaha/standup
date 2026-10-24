@@ -85,6 +85,28 @@ export class Skeleton {
     ctx.lineCap = 'round';
     ctx.lineJoin = 'round';
 
+    // 0. 脚下的光斑：让他站在地上，而不是浮在画面里
+    const a27 = landmarks[27];
+    const a28 = landmarks[28];
+    if (a27 && a28 && (a27.visibility ?? 1) > 0.3 && (a28.visibility ?? 1) > 0.3) {
+      const fx = (pts[27][0] + pts[28][0]) / 2;
+      const fy = Math.max(pts[27][1], pts[28][1]);
+      const rx = Math.max(Math.abs(pts[28][0] - pts[27][0]) * 2.4, unit * 30);
+
+      ctx.save();
+      ctx.translate(fx, fy);
+      ctx.scale(1, 0.26);
+      const g = ctx.createRadialGradient(0, 0, 0, 0, 0, rx);
+      g.addColorStop(0, `hsla(${hue}, 100%, 62%, 0.34)`);
+      g.addColorStop(0.55, `hsla(${hue}, 100%, 60%, 0.10)`);
+      g.addColorStop(1, `hsla(${hue}, 100%, 60%, 0)`);
+      ctx.fillStyle = g;
+      ctx.beginPath();
+      ctx.arc(0, 0, rx, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.restore();
+    }
+
     // 1. 外层光晕
     ctx.strokeStyle = glow;
     ctx.lineWidth = unit * 7 * pulse;
@@ -93,7 +115,7 @@ export class Skeleton {
 
     // 2. 主体
     ctx.strokeStyle = base;
-    ctx.lineWidth = unit * 2.6 * pulse;
+    ctx.lineWidth = unit * 3 * pulse;
     ctx.globalAlpha = 0.85;
     this.strokeBones(pts, landmarks);
     ctx.stroke();

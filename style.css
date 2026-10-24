@@ -499,7 +499,7 @@ html, body {
   position: absolute;
   left: 0;
   right: 0;
-  height: 36%;
+  height: 30%;
   z-index: 3;
   pointer-events: none;
 }
@@ -508,8 +508,8 @@ html, body {
   top: 0;
   background: linear-gradient(
     to bottom,
-    rgba(2, 4, 6, 0.82) 0%,
-    rgba(2, 4, 6, 0.46) 42%,
+    rgba(2, 4, 6, 0.68) 0%,
+    rgba(2, 4, 6, 0.32) 42%,
     rgba(2, 4, 6, 0) 100%
   );
 }
@@ -518,8 +518,8 @@ html, body {
   bottom: 0;
   background: linear-gradient(
     to top,
-    rgba(2, 4, 6, 0.86) 0%,
-    rgba(2, 4, 6, 0.40) 46%,
+    rgba(2, 4, 6, 0.62) 0%,
+    rgba(2, 4, 6, 0.26) 46%,
     rgba(2, 4, 6, 0) 100%
   );
 }
@@ -531,23 +531,138 @@ html, body {
   background: #000;
 }
 
-.video-bg, .video-fg {
+/* ---------------- 挑战页背景 ---------------- */
+
+/* 舞台是程序化生成的夜景，摄像头画面完全不显示 */
+.scene {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  background:
+    radial-gradient(120% 78% at 50% 112%, rgba(59, 255, 193, 0.16), transparent 60%),
+    radial-gradient(74% 56% at 14% -8%, rgba(59, 143, 255, 0.10), transparent 62%),
+    linear-gradient(180deg, #080d15 0%, #060910 46%, #04060b 100%);
+}
+
+.scene-glow {
+  position: absolute;
+  left: 50%;
+  bottom: 4%;
+  width: min(120vw, 1100px);
+  height: min(52vh, 520px);
+  transform: translateX(-50%);
+  background: radial-gradient(closest-side,
+    rgba(59, 255, 193, 0.20),
+    rgba(59, 255, 193, 0.05) 55%,
+    transparent 78%);
+  filter: blur(6px);
+  animation: sceneBreathe 9s ease-in-out infinite;
+}
+
+@keyframes sceneBreathe {
+  0%, 100% { opacity: 0.72; transform: translateX(-50%) scale(1); }
+  50%      { opacity: 1;    transform: translateX(-50%) scale(1.06); }
+}
+
+.scene-orb {
+  position: absolute;
+  top: 10%;
+  right: 6%;
+  width: 42vmin;
+  height: 42vmin;
+  border-radius: 50%;
+  background: radial-gradient(circle at 34% 30%, rgba(59, 143, 255, 0.22), transparent 62%);
+  filter: blur(18px);
+  animation: orbDrift 26s ease-in-out infinite;
+}
+
+@keyframes orbDrift {
+  0%, 100% { transform: translate(0, 0); }
+  50%      { transform: translate(-6%, 4%); }
+}
+
+/* 透视网格地面，给火柴人一个站的地方 */
+.scene-floor {
+  position: absolute;
+  left: -30%;
+  right: -30%;
+  bottom: -2%;
+  height: 220%;
+  background-image:
+    linear-gradient(rgba(59, 255, 193, 0.34) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(59, 255, 193, 0.24) 1px, transparent 1px);
+  background-size: 90px 90px, 90px 90px;
+  transform: perspective(1000px) rotateX(52deg);
+  transform-origin: bottom center;
+  opacity: 0.9;
+}
+
+/* 让远处的地面自然消失，不出现一条硬边 */
+.scene-fade {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 55%;
+  background: linear-gradient(to top,
+    rgba(5, 7, 10, 0) 62%,
+    rgba(5, 7, 10, 0.72) 88%,
+    #05070a 100%);
+}
+
+/* 地平线：一条极细的光带，把天空和地面分开 */
+.scene-horizon {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 38%;
+  height: 1px;
+  background: linear-gradient(90deg,
+    transparent,
+    rgba(59, 255, 193, 0.22) 18%,
+    rgba(59, 255, 193, 0.55) 50%,
+    rgba(59, 255, 193, 0.22) 82%,
+    transparent);
+}
+
+/* 远处的星点，避免上半部分太空 */
+.scene-stars {
+  position: absolute;
+  inset: 0;
+  opacity: 0.75;
+  background-image:
+    radial-gradient(1.4px 1.4px at 16% 18%, rgba(255, 255, 255, 0.55), transparent),
+    radial-gradient(1.2px 1.2px at 31% 9%, rgba(255, 255, 255, 0.40), transparent),
+    radial-gradient(1.6px 1.6px at 68% 13%, rgba(255, 255, 255, 0.50), transparent),
+    radial-gradient(1.1px 1.1px at 82% 26%, rgba(255, 255, 255, 0.36), transparent),
+    radial-gradient(1.3px 1.3px at 8% 34%, rgba(255, 255, 255, 0.32), transparent),
+    radial-gradient(1.2px 1.2px at 46% 6%, rgba(255, 255, 255, 0.34), transparent),
+    radial-gradient(1.5px 1.5px at 91% 8%, rgba(255, 255, 255, 0.42), transparent);
+}
+
+/* 取景框：告诉用户摄像头覆盖的范围，画面本身不显示 */
+.scene-frame {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: min(90vw, calc(86vh * var(--frame-ar, 1.7778)));
+  height: min(86vh, calc(90vw / var(--frame-ar, 1.7778)));
+  transform: translate(-50%, -50%);
+  border: 1px solid rgba(59, 255, 193, 0.12);
+  border-radius: 22px;
+  box-shadow: inset 0 0 60px rgba(59, 255, 193, 0.03);
+}
+
+/* 摄像头只作为识别的输入，不参与显示 */
+.video-src {
   position: absolute;
   inset: 0;
   width: 100%;
   height: 100%;
-  transform: scaleX(-1);
-}
-
-.video-bg {
-  object-fit: cover;
-  filter: blur(46px) brightness(0.28) saturate(1.6);
-  transform: scaleX(-1) scale(1.18);
-}
-
-.video-fg {
   object-fit: contain;
-  opacity: 0.92;
+  transform: scaleX(-1);
+  opacity: 0;
+  pointer-events: none;
 }
 
 #overlay {
@@ -561,7 +676,7 @@ html, body {
   position: absolute;
   inset: 0;
   pointer-events: none;
-  background: radial-gradient(ellipse at center, transparent 42%, rgba(0,0,0,0.62) 100%);
+  background: radial-gradient(ellipse at center, transparent 50%, rgba(0,0,0,0.42) 100%);
 }
 
 .scanline {
