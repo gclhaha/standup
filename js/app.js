@@ -123,6 +123,7 @@ const state = {
   fps: 0,
   lastCoach: '',
   reminderInterval: 60,
+  visualEnergy: 0,
   challengeSource: 'manual'
 };
 
@@ -317,6 +318,13 @@ function onFrame(d) {
   const t = performance.now() / 1000;
 
   skeleton.draw(d.landmarks, d.intensity, t);
+
+  // 把运动强度交给舞台：地面、地平线、光晕随之起伏
+  const energy = Math.round(skeleton.energy * 100) / 100;
+  if (energy !== state.visualEnergy) {
+    state.visualEnergy = energy;
+    el.stage.style.setProperty('--energy', String(energy));
+  }
 
   // 帧率统计
   state.frames++;

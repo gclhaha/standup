@@ -594,7 +594,13 @@ html, body {
   background-size: 90px 90px, 90px 90px;
   transform: perspective(1000px) rotateX(52deg);
   transform-origin: bottom center;
-  opacity: 0.9;
+  /* 运动越猛，地面越亮；不动时退到背景里 */
+  opacity: calc(0.45 + var(--energy, 0) * 0.55);
+}
+
+/* 地平线光带也随运动强度起伏 */
+.scene-horizon {
+  opacity: calc(0.6 + var(--energy, 0) * 0.4);
 }
 
 /* 让远处的地面自然消失，不出现一条硬边 */
@@ -608,6 +614,31 @@ html, body {
     rgba(5, 7, 10, 0) 62%,
     rgba(5, 7, 10, 0.72) 88%,
     #05070a 100%);
+}
+
+/* 极光：让上半部分缓慢流动，不是一块死板的渐变 */
+.scene-aurora {
+  position: absolute;
+  inset: -20% -30%;
+  background:
+    radial-gradient(60% 42% at 30% 22%, rgba(59, 143, 255, 0.14), transparent 66%),
+    radial-gradient(52% 36% at 74% 8%, rgba(120, 255, 214, 0.10), transparent 62%);
+  filter: blur(24px);
+  animation: auroraDrift 34s ease-in-out infinite alternate;
+}
+
+@keyframes auroraDrift {
+  from { transform: translate3d(-2%, -1%, 0) rotate(-2deg); }
+  to   { transform: translate3d(3%, 2%, 0) rotate(2deg); }
+}
+
+@keyframes starTwinkle {
+  0%, 100% { opacity: 0.45; }
+  50%      { opacity: 0.85; }
+}
+
+.scene-stars {
+  animation: starTwinkle 7s ease-in-out infinite;
 }
 
 /* 地平线：一条极细的光带，把天空和地面分开 */
