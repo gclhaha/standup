@@ -20,6 +20,8 @@ const el = {
   btnStart: $('btn-start'),
 
   viewport: $('viewport'),
+  videoBg: $('video-bg'),
+  viewPicker: $('view-picker'),
   video: $('video'),
   overlay: $('overlay'),
 
@@ -124,6 +126,7 @@ const state = {
   lastCoach: '',
   reminderInterval: 60,
   visualEnergy: 0,
+  display: 'stage',
   challengeSource: 'manual'
 };
 
@@ -275,6 +278,7 @@ async function openCamera() {
   el.video.srcObject = stream;
 
   await el.video.play().catch(() => {});
+  syncViewVideo();
 
   skeleton.setVideoSize(el.video.videoWidth, el.video.videoHeight);
 
@@ -292,6 +296,7 @@ function stopCamera() {
     state.stream = null;
   }
   el.video.srcObject = null;
+  el.videoBg.srcObject = null;
 }
 
 /* ---------------- 画布尺寸 ---------------- */
@@ -726,6 +731,42 @@ el.ledeSec.textContent = state.duration;
 
 state.reminderInterval = reminder.interval;
 document.documentElement.dataset.intv = String(reminder.interval);
+
+/* ---------------- 画面显示方式 ---------------- */
+
+function applyView(mode) {
+  const m = mode === 'real' ? 'real' : 'stage';
+  state.display = m;
+  document.documentElement.dataset.view = m;
+  el.stage.classList.toggle('mode-real', m === 'real');
+  // 真人模式用回最初的线稿骨架；舞台模式用霓虹形体
+  skeleton.setStyle(m === 'real' ? 'line' : 'neon');
+  store.config.display = m;
+  store.saveConfig();
+  syncViewVideo();
+}
+
+// 背景那层（模糊铺底）只在真人模式下挂流，舞台模式下彻底不解码
+function syncViewVideo() {
+  const want = state.display === 'real';
+  if (want && state.stream) {
+    if (el.videoBg.srcObject !== state.stream) {
+      el.videoBg.srcObject = state.stream;
+      el.videoBg.play().catch(() => {});
+    }
+  } else if (el.videoBg && el.videoBg.srcObject) {
+    el.videoBg.srcObject = null;
+  }
+}
+
+el.viewPicker.addEventListener('click', (e) => {
+  const btn = e.target.closest('.chip[data-view]');
+  if (!btn) return;
+  applyView(btn.dataset.view);
+});
+
+const urlView = new URLSearchParams(location.search).get('view');
+applyView(urlView || store.config.display || 'stage');
 
 el.reminderIntervals.addEventListener('click', (e) => {
   const btn = e.target.closest('.chip');

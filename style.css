@@ -149,6 +149,34 @@ html, body {
 
 .chip:hover { color: #cfe6e0; border-color: rgba(59, 255, 193, 0.35); }
 
+/* 画面选择：比时长选择轻一档，它是次要设置 */
+.picker-caption {
+  margin-top: 16px;
+  font-size: var(--fs-micro);
+  letter-spacing: 0.12em;
+  color: #6d7f7c;
+}
+
+.picker-view {
+  align-items: center;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.picker-view .chip {
+  height: 30px;
+  padding: 0 15px;
+  font-size: 12px;
+}
+
+html[data-view="stage"] #view-picker .chip[data-view="stage"],
+html[data-view="real"] #view-picker .chip[data-view="real"] {
+  color: #04120d;
+  background: var(--mint);
+  border-color: var(--mint);
+  box-shadow: 0 0 30px rgba(59, 255, 193, 0.30);
+}
+
 .chip.active {
   color: #04120d;
   background: var(--mint);
@@ -538,6 +566,7 @@ html, body {
   position: absolute;
   inset: 0;
   overflow: hidden;
+  transition: opacity 0.4s ease;
   background:
     radial-gradient(120% 78% at 50% 112%, rgba(59, 255, 193, 0.16), transparent 60%),
     radial-gradient(74% 56% at 14% -8%, rgba(59, 143, 255, 0.10), transparent 62%),
@@ -684,17 +713,33 @@ html, body {
   box-shadow: inset 0 0 60px rgba(59, 255, 193, 0.03);
 }
 
-/* 摄像头只作为识别的输入，不参与显示 */
-.video-src {
+/* 两个视频层：舞台模式完全隐藏，真人模式才显示 */
+.video-bg,
+.video-fg {
   position: absolute;
   inset: 0;
   width: 100%;
   height: 100%;
-  object-fit: contain;
   transform: scaleX(-1);
   opacity: 0;
   pointer-events: none;
+  transition: opacity 0.4s ease;
 }
+
+.video-bg {
+  object-fit: cover;
+  filter: blur(46px) brightness(0.26) saturate(1.6);
+  transform: scaleX(-1) scale(1.18);
+}
+
+.video-fg {
+  object-fit: contain;
+}
+
+/* 真人模式：露出摄像头画面，收起舞台 */
+#stage.mode-real .video-bg { opacity: 1; }
+#stage.mode-real .video-fg { opacity: 0.94; }
+#stage.mode-real .scene { opacity: 0; }
 
 #overlay {
   position: absolute;

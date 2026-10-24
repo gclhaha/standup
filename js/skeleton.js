@@ -69,6 +69,17 @@ export class Skeleton {
     }
   }
 
+  /** 切换绘制风格：neon 霓虹形体 / line 纯线稿 */
+  setStyle(style) {
+    const next = style === 'line' ? 'line' : 'neon';
+    if (next === this.style) return;
+    this.style = next;
+    this.trail = [];
+    this.particles = [];
+    this.ripples = [];
+    this.prevPts = null;
+  }
+
   /** 归一化坐标 -> 屏幕坐标（object-fit: contain + 水平镜像） */
   project(lm) {
     const vw = this.videoW;

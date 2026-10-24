@@ -16,9 +16,11 @@
     var r = document.documentElement;
     r.dataset.dur = String(c.duration || 30);
     r.dataset.intv = String(c.interval || 60);
+    r.dataset.view = c.display === 'real' ? 'real' : 'stage';
   } catch (e) {
     document.documentElement.dataset.dur = '30';
     document.documentElement.dataset.intv = '60';
+    document.documentElement.dataset.view = 'stage';
   }
 })();
 </script>
@@ -42,11 +44,17 @@
         <button class="chip" data-duration="90" type="button">90 秒</button>
       </div>
 
+      <p class="picker-caption">画面</p>
+      <div class="picker picker-view" id="view-picker" role="group" aria-label="选择画面显示方式">
+        <button class="chip" data-view="stage" type="button">舞台</button>
+        <button class="chip" data-view="real" type="button">真人</button>
+      </div>
+
       <button class="primary" id="btn-start" type="button">
         <span>打开摄像头 · 开始</span>
       </button>
 
-      <p class="privacy">摄像头只用来识别动作，画面不显示、不录制；<br />运动记录存在浏览器本地，都不上传云端。</p>
+      <p class="privacy">摄像头只用来识别动作，不录制、不上传；<br />运动记录存在浏览器本地，都不经过云端。</p>
 
       <div class="how">
         <div class="how-item"><b>01</b><span>站到镜头前，让全身进入画面</span></div>
@@ -108,8 +116,9 @@
         <div class="scene-frame"></div>
       </div>
 
-      <!-- 摄像头只用于识别，不作为画面显示 -->
-      <video class="video-src" id="video" playsinline muted></video>
+      <!-- 真人模式才显示的摄像头画面 -->
+      <video class="video-bg" id="video-bg" playsinline muted></video>
+      <video class="video-fg" id="video" playsinline muted></video>
 
       <canvas id="overlay"></canvas>
       <div class="vignette"></div>
