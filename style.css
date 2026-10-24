@@ -242,9 +242,10 @@ html, body {
   margin-top: 18px;
   font-size: var(--fs-label);
   font-weight: 400;
-  line-height: 1.6;
-  letter-spacing: 0.04em;
-  color: var(--c-faint);
+  line-height: 1.7;
+  letter-spacing: 0.03em;
+  /* 比说明文字更轻，但要能看清：11px 字号下 #55645f 对比度不足 */
+  color: #6d7f7c;
 }
 
 .how {
